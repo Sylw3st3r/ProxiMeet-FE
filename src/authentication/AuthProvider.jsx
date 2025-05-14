@@ -3,13 +3,12 @@ import { useCallback } from "react";
 import { AuthContext } from "./auth-context";
 
 export const defaultAuthenticationContext = {
-  isLoggedIn: false,
-  expirationDate: null,
   firstName: null,
   lastName: null,
   email: null,
   token: null,
-  role: null,
+  isLoggedIn: false,
+  expirationDate: null,
   setUserData: () => {},
   logout: () => {},
 };
@@ -20,16 +19,17 @@ export default function AuthProvider({ children }) {
   const [context, setContext] = useState({
     ...defaultAuthenticationContext,
   });
-  // const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
+  const [tokenExpirationDate, setTokenExpirationDate] = useState(null);
 
   const setUserData = useCallback((newContext) => {
     const expirationDate = new Date(new Date().getTime() + 1000 * 60 * 60);
-    // setTokenExpirationDate(expirationDate);
+    setTokenExpirationDate(expirationDate);
     setContext((oldContext) => {
       const newUserData = {
-        // ...oldContext,
+        ...oldContext,
         ...newContext,
         expirationDate: expirationDate.toISOString(),
+        isLoggedIn: true,
       };
       localStorage.setItem("userData", JSON.stringify(newUserData));
       return newUserData;
@@ -41,15 +41,15 @@ export default function AuthProvider({ children }) {
     setContext(defaultAuthenticationContext);
   }, []);
 
-  // useEffect(() => {
-  //   if (context.token && tokenExpirationDate) {
-  //     const remainingTime =
-  //       tokenExpirationDate.getTime() - new Date().getTime();
-  //     logoutTimer = setTimeout(logout, remainingTime);
-  //   } else {
-  //     clearTimeout(logoutTimer);
-  //   }
-  // }, [context, tokenExpirationDate]);
+  useEffect(() => {
+    if (context.token && tokenExpirationDate) {
+      const remainingTime =
+        tokenExpirationDate.getTime() - new Date().getTime();
+      logoutTimer = setTimeout(logout, remainingTime);
+    } else {
+      clearTimeout(logoutTimer);
+    }
+  }, [context, tokenExpirationDate]);
 
   useEffect(() => {
     (async function () {
@@ -59,7 +59,7 @@ export default function AuthProvider({ children }) {
         const timer = new Date(parsedData.expirationDate);
         if (timer.getTime() > new Date()) {
           setContext(parsedData);
-          // setTokenExpirationDate(timer);
+          setTokenExpirationDate(timer);
         } else {
           localStorage.removeItem("userData");
         }

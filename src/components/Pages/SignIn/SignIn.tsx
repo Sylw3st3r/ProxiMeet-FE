@@ -1,10 +1,13 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography } from "@mui/material";
-import FormInput from "../../utils/Input/Input";
-import FormButton from "../../utils/FormButton/FormButton";
+import FormInput from "../../Form/Input";
+import FormButton from "../../Form/FormButton";
+import axios from "axios";
+import { AuthContext } from "../../../authentication/auth-context";
+import { useNavigate } from "react-router";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
@@ -32,7 +35,26 @@ const INITIAL_VALUES = {
 };
 
 export default function SignIn() {
+  const { setUserData } = useContext(AuthContext);
   const { t } = useTranslation();
+
+  const navigate = useNavigate();
+
+  function handleClick() {
+    navigate("/signup");
+  }
+
+  const handleSubmit = async (data: any) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/users/signin",
+        data,
+      );
+      setUserData(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <Box
@@ -45,7 +67,7 @@ export default function SignIn() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(signupData) => console.log(signupData)}
+        onSubmit={handleSubmit}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -57,7 +79,7 @@ export default function SignIn() {
             ))}
             <FormButton>Signin</FormButton>
             <Typography textAlign="center">{t("or")}</Typography>
-            <Button>{t("signup")}</Button>
+            <Button onClick={handleClick}>{t("signup")}</Button>
           </Box>
         </Form>
       </Formik>

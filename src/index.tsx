@@ -13,6 +13,7 @@ import {
   teal,
   green,
 } from "@mui/material/colors";
+import AuthProvider from "./authentication/AuthProvider";
 
 // Corporate Theme - Professional and clean
 const corporateTheme = createTheme({
@@ -154,8 +155,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={minimalTheme}>
-      <App />
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider theme={minimalTheme}>
+        <App />
+      </ThemeProvider>
+    </AuthProvider>
   </React.StrictMode>,
 );
