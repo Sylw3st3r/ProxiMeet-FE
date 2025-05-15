@@ -1,1 +1,1 @@
-export type EventFields = "name" | "description" | "location" | "image";
+export type EventFields = "name" | "description" | "image" | "location";

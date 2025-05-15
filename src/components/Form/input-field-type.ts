@@ -1,1 +1,1 @@
-export type InputTypes = "text" | "image";
+export type InputTypes = "text" | "image" | "location";

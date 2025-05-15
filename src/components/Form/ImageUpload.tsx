@@ -100,7 +100,7 @@ export default function ImageUpload({ name, label, aspect = 16 / 9 }: any) {
       type: "image/jpeg",
     });
     helpers.setValue(croppedFile);
-    helpers.setTouched(true);
+    helpers.setTouched(false);
     setCropDialogOpen(false);
     setImageSrc(null);
   };
@@ -115,16 +115,11 @@ export default function ImageUpload({ name, label, aspect = 16 / 9 }: any) {
     multiple: false,
   });
 
-  const showError = Boolean(meta.error);
+  const showError = Boolean(meta.error && meta.touched);
 
   return (
     <>
-      <FormControl
-        fullWidth
-        error={showError}
-        variant="standard"
-        sx={{ mb: 2 }}
-      >
+      <FormControl fullWidth error={showError} variant="standard">
         {label && (
           <InputLabel focused shrink htmlFor={`image-upload-${name}`}>
             {label}
@@ -145,11 +140,7 @@ export default function ImageUpload({ name, label, aspect = 16 / 9 }: any) {
               },
             }}
           >
-            <input
-              style={{ marginBottom: "8px" }}
-              {...getInputProps()}
-              id={`image-upload-${name}`}
-            />
+            <input {...getInputProps()} id={`image-upload-${name}`} />
             <Typography
               variant="body2"
               color={showError ? "error.main" : "textSecondary"}
@@ -164,7 +155,7 @@ export default function ImageUpload({ name, label, aspect = 16 / 9 }: any) {
             mt={2}
             display="flex"
             flexDirection="row"
-            alignItems="center"
+            alignItems="flex-start"
             gap={1}
           >
             <Box flex={1}>

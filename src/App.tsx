@@ -14,6 +14,19 @@ import UnauthorizedLayout from "./components/Layout/Unauthorized/UnauthorizedLay
 import VerifyAccount from "./components/Pages/Verify/VerifyAccount";
 import VerifyFaied from "./components/Pages/Verify/VerificationFailed";
 import AddEventModal from "./components/Pages/Events/Forms/AddEvent";
+import NearYou from "./components/Pages/NearYou/NearYou";
+
+import L from "leaflet";
+import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
+import markerIcon from "leaflet/dist/images/marker-icon.png";
+import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import "leaflet/dist/leaflet.css";
+
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 const createRouter = (token: string | null) =>
   createBrowserRouter([
@@ -23,7 +36,7 @@ const createRouter = (token: string | null) =>
       children: [
         { index: true, Component: Home },
         {
-          path: "/dashboard/events",
+          path: "events",
           Component: Events,
           loader: async () => {
             return axios.get(`http://localhost:3001/events/all`, {
@@ -49,6 +62,10 @@ const createRouter = (token: string | null) =>
               },
             },
           ],
+        },
+        {
+          path: "near-you",
+          Component: NearYou,
         },
       ],
     },

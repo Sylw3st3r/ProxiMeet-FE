@@ -5,96 +5,57 @@ import {
   Typography,
   Grid,
   Card,
-  Button,
+  Box,
+  useTheme,
 } from "@mui/material";
-import { Outlet, useLoaderData, useNavigate } from "react-router";
-
-const EventCard = ({
-  name,
-  description,
-  image,
-  id,
-}: {
-  id: number;
-  name: string;
-  description: string;
-  image: string;
-}) => {
-  const navigate = useNavigate();
-
-  return (
-    <Card>
-      <CardMedia
-        component="img"
-        height="200"
-        image={`http://localhost:3001/images/${image}`}
-        alt={name}
-      />
-      <CardContent>
-        <Typography gutterBottom variant="h5" component="div">
-          {name}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {description}
-        </Typography>
-        <Button
-          onClick={() => {
-            navigate(`edit/${id}`);
-          }}
-        >
-          EDIT
-        </Button>
-      </CardContent>
-    </Card>
-  );
-};
-
-export default function Events() {
+import { Outlet, useLoaderData } from "react-router";
+const CardGrid = () => {
   const { data } = useLoaderData();
   const [events, setEvents] = useState<
     { name: string; id: number; description: string; image: string }[]
   >(data.events);
-
-  const updateEvent = (object: {
-    id: number;
-    organizerId: number;
-    name: string;
-    description: string;
-    location: string;
-    image: string;
-  }) => {
-    setEvents((previousState) => {
-      const indexToReplace = previousState.findIndex(
-        (event) => event.id === object.id,
-      );
-
-      const newState = [...previousState];
-      if (indexToReplace !== -1) {
-        newState.splice(indexToReplace, 1, object);
-      }
-
-      return newState;
-    });
-  };
+  const cardWidth = 220;
 
   return (
-    <Grid
-      container
-      p={3}
-      spacing={{ xs: 2, md: 3 }}
-      columns={{ xs: 6, sm: 8, md: 12 }}
-    >
-      {events.map((event) => (
-        <Grid size={{ xs: 2, sm: 4, md: 4 }} key={event.id}>
-          <EventCard
-            id={event.id}
-            name={event.name}
-            description={event.description}
-            image={event.image}
-          />
-        </Grid>
-      ))}
-      <Outlet context={updateEvent} />
-    </Grid>
+    <Box p={2}>
+      <Grid container spacing={3} justifyContent={"center"}>
+        {[...events, ...events, ...events, ...events, ...events].map(
+          (item, index) => (
+            <Grid key={index} style={{ flexGrow: 1, maxWidth: cardWidth }}>
+              <Card
+                sx={{
+                  width: cardWidth,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+                elevation={4}
+              >
+                <CardMedia
+                  component="img"
+                  image={`http://localhost:3001/images/${item.image}`}
+                  alt={item.name}
+                  sx={{
+                    aspectRatio: "16/9",
+                    objectFit: "cover",
+                  }}
+                />
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    {item.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {item.description}
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Grid>
+          ),
+        )}
+      </Grid>
+      <Outlet></Outlet>
+    </Box>
   );
-}
+};
+
+export default CardGrid;
