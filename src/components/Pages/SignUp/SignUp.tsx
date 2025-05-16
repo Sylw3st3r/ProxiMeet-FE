@@ -1,11 +1,10 @@
-import React, { useContext } from "react";
+import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
-import { Box, Button, Typography, TextField } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import { AuthContext } from "../../../authentication/auth-context";
 import axios from "axios";
 import { useNavigate } from "react-router";
 
@@ -64,25 +63,24 @@ const INITIAL_VALUES = {
 
 export default function SignUp() {
   const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
 
   const handleSubmit = async (data: any) => {
-    console.log(data);
-
-    let response;
     try {
-      response = await axios.put("http://localhost:3001/users/signup", data);
+      const response = await axios.put(
+        "http://localhost:3001/users/signup",
+        data,
+      );
+      console.log(response);
     } catch (error) {
       console.log(error);
     }
-
-    console.log(response);
   };
 
-  const navigate = useNavigate();
-
-  function handleClick() {
+  const handleClick = () => {
     navigate("/");
-  }
+  };
 
   return (
     <Box
@@ -91,6 +89,7 @@ export default function SignUp() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        bgcolor: theme.palette.background.default,
       }}
     >
       <Formik
@@ -100,14 +99,42 @@ export default function SignUp() {
       >
         <Form>
           <Box
-            sx={{ display: "flex", flexDirection: "column", width: "300px" }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "300px",
+              p: 3,
+              borderRadius: 2,
+              backgroundColor: theme.palette.background.paper,
+              boxShadow: theme.shadows[3],
+            }}
           >
+            <Typography
+              variant="h6"
+              noWrap
+              color="primary"
+              sx={{ textAlign: "center", mb: 2 }}
+            >
+              ProxiMeet
+            </Typography>
+
             {INPUT_FIELDS_DEFINITIONS.map((definition, index) => (
               <FormInput variant="standard" key={index} {...definition} />
             ))}
+
             <FormButton>signup</FormButton>
-            <Typography textAlign="center">{t("or")}</Typography>
-            <Button onClick={handleClick}>{t("signin")}</Button>
+
+            <Typography
+              textAlign="center"
+              color="text.secondary"
+              sx={{ my: 2 }}
+            >
+              {t("or")}
+            </Typography>
+
+            <Button onClick={handleClick} variant="outlined">
+              {t("signin")}
+            </Button>
           </Box>
         </Form>
       </Formik>

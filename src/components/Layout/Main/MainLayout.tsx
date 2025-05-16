@@ -1,21 +1,12 @@
-import React, { useContext, useEffect } from "react";
-import { Link, Navigate, Outlet, useNavigation } from "react-router";
+import React, { useContext } from "react";
+import { Navigate, Outlet } from "react-router";
 import { AuthContext } from "../../../authentication/auth-context";
-import { Box, Button, LinearProgress, useTheme } from "@mui/material";
+import { Box, useTheme } from "@mui/material";
 import SidebarNav from "./Sidebar";
 
 export default function MainLayout() {
-  const { isLoggedIn, logout } = useContext(AuthContext);
-  const navigation = useNavigation();
+  const { isLoggedIn } = useContext(AuthContext);
   const theme = useTheme();
-
-  // useEffect(() => {
-  //   if (navigation.state === 'loading') {
-  //     nprogress.start();
-  //   } else {
-  //     nprogress.done();
-  //   }
-  // }, [navigation.state]);
 
   // Layout with sidenav. If user hasnt sign in the we redirect to "/"
   return isLoggedIn ? (
@@ -28,7 +19,6 @@ export default function MainLayout() {
           overflow: "auto",
         }}
       >
-        {navigation.state === "loading" && <LinearProgress />}
         <Outlet />
       </Box>
     </Box>

@@ -7,8 +7,11 @@ import {
   CardMedia,
   Dialog,
   Typography,
+  useTheme,
+  Toolbar,
+  Select,
+  MenuItem,
 } from "@mui/material";
-import { useTranslation } from "react-i18next";
 import {
   MapContainer,
   TileLayer,
@@ -58,10 +61,17 @@ export function CustomPopup({ name, image, description }) {
   );
 }
 
+const KM_TO_M = 1000;
+const MILES_TO_M = 1609.34;
+
 export default function NearYou() {
   const { token } = useContext(AuthContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [events, setEvents] = useState([]);
+  const [radius, setRadius] = useState(50);
+  const [unit, setUnit] = useState("km");
+
+  const theme = useTheme();
 
   const [location, setLocation] = useState(null);
   const [error, setError] = useState(null);
@@ -88,7 +98,7 @@ export default function NearYou() {
   const getData = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3001/events/near?lat=${location.lat}&lng=${location.lng}&radius=${50}`,
+        `http://localhost:3001/events/near?lat=${location.lat}&lng=${location.lng}&radius=${radius}&unit=${unit}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -104,7 +114,7 @@ export default function NearYou() {
     if (location) {
       getData();
     }
-  }, [location]);
+  }, [location, radius, unit]);
 
   // Component that shows a marker in selected location
   const LocationMarker = () => {
@@ -118,11 +128,46 @@ export default function NearYou() {
   };
 
   return location ? (
-    <>
+    <Box
+      flexDirection={"column"}
+      style={{ height: "100vh", width: "100%", display: "flex" }}
+    >
+      <Toolbar
+        sx={{
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          zIndex: 200,
+          bgcolor: theme.palette.background.paper,
+          flexWrap: "wrap",
+        }}
+      >
+        <Select
+          value={radius}
+          onChange={(event) => {
+            setRadius(event.target.value);
+          }}
+          autoWidth
+          size="small"
+        >
+          <MenuItem value={20}>20</MenuItem>
+          <MenuItem value={50}>50</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+        </Select>
+        <Select
+          value={unit}
+          onChange={(event) => {
+            setUnit(event.target.value);
+          }}
+          autoWidth
+          size="small"
+        >
+          <MenuItem value={"km"}>Kilometers</MenuItem>
+          <MenuItem value={"mi"}>Miles</MenuItem>
+        </Select>
+      </Toolbar>
       <MapContainer
         center={[location.lat, location.lng]}
         zoom={9}
-        style={{ height: "100vh", width: "100%" }}
+        style={{ flex: 1 }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -130,8 +175,8 @@ export default function NearYou() {
         />
         <Circle
           center={[location.lat, location.lng]}
-          radius={50000} // 50 kilometers in meters
-          pathOptions={{ color: "#578dd4", fillOpacity: 0.2 }}
+          radius={radius * (unit === "km" ? KM_TO_M : MILES_TO_M)}
+          pathOptions={{ color: theme.palette.primary, fillOpacity: 0.2 }}
         />
         <LocationMarker />
         {events.map((event) => {
@@ -167,7 +212,7 @@ export default function NearYou() {
           </Card>
         </Dialog>
       ) : null}
-    </>
+    </Box>
   ) : (
     <Typography>No location</Typography>
   );

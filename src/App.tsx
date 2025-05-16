@@ -21,6 +21,8 @@ import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
+import UserEvents from "./components/Pages/Events/UserEvents";
+import { useColorScheme } from "@mui/material";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -38,13 +40,10 @@ const createRouter = (token: string | null) =>
         {
           path: "events",
           Component: Events,
-          loader: async () => {
-            return axios.get(`http://localhost:3001/events/all`, {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            });
-          },
+        },
+        {
+          path: "user-events",
+          Component: UserEvents,
           children: [
             {
               path: "add",
@@ -98,6 +97,11 @@ const createRouter = (token: string | null) =>
 
 export default function App() {
   const { token, dataLoading } = useContext(AuthContext);
+  const { mode } = useColorScheme();
 
-  return dataLoading ? <></> : <RouterProvider router={createRouter(token)} />;
+  if (dataLoading || !mode) {
+    return null;
+  }
+
+  return <RouterProvider router={createRouter(token)} />;
 }

@@ -6,7 +6,7 @@ export default function FormButton({ children, ...other }: any) {
   const { submitForm } = useFormikContext();
 
   return (
-    <Button {...other} onClick={submitForm}>
+    <Button variant="outlined" sx={{ mt: 2 }} {...other} onClick={submitForm}>
       {children}
     </Button>
   );

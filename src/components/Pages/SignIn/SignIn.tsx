@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
 import axios from "axios";
@@ -25,7 +25,7 @@ const INPUT_FIELDS_DEFINITIONS = [
 ];
 
 const VALIDATOR = Yup.object({
-  email: Yup.string().required("email.required").email("email.invalid"),
+  email: Yup.string().required("email.required"),
   password: Yup.string().required("password.required"),
 });
 
@@ -37,6 +37,7 @@ const INITIAL_VALUES = {
 export default function SignIn() {
   const { setUserData } = useContext(AuthContext);
   const { t } = useTranslation();
+  const theme = useTheme();
 
   const navigate = useNavigate();
 
@@ -63,6 +64,7 @@ export default function SignIn() {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        bgcolor: theme.palette.background.paper,
       }}
     >
       <Formik
@@ -72,14 +74,42 @@ export default function SignIn() {
       >
         <Form>
           <Box
-            sx={{ display: "flex", flexDirection: "column", width: "300px" }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              width: "300px",
+              p: 3,
+              borderRadius: 2,
+              backgroundColor: "background.paper",
+              boxShadow: theme.shadows[3],
+            }}
           >
+            <Typography
+              variant="h6"
+              noWrap
+              color="primary"
+              sx={{ textAlign: "center", mb: 2 }}
+            >
+              ProxiMeet
+            </Typography>
+
             {INPUT_FIELDS_DEFINITIONS.map((definition, index) => (
               <FormInput variant="standard" key={index} {...definition} />
             ))}
+
             <FormButton>Signin</FormButton>
-            <Typography textAlign="center">{t("or")}</Typography>
-            <Button onClick={handleClick}>{t("signup")}</Button>
+
+            <Typography
+              textAlign="center"
+              color="text.secondary"
+              sx={{ my: 2 }}
+            >
+              {t("or")}
+            </Typography>
+
+            <Button onClick={handleClick} variant="outlined">
+              {t("signup")}
+            </Button>
           </Box>
         </Form>
       </Formik>

@@ -11,29 +11,43 @@ import {
   ListItemButton,
   IconButton,
   Box,
+  useTheme,
 } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
 import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
+import MapIcon from "@mui/icons-material/Map";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { NavLink } from "react-router-dom";
 import { ExitToApp } from "@mui/icons-material";
+import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../../authentication/auth-context";
 
 const drawerWidth = 240;
 const iconOnlyWidth = 60;
 
 const navItems = [
-  { label: "Dashboard", icon: <InboxIcon />, path: "/dashboard", end: true },
   {
-    label: "Events",
-    icon: <MailIcon />,
+    label: "Dashboard",
+    icon: <DashboardIcon />,
+    path: "/dashboard",
+    end: true,
+  },
+  {
+    label: "All Events",
+    icon: <DashboardIcon />,
     path: "/dashboard/events",
     end: false,
   },
   {
-    label: "Near You",
+    label: "Your Events",
     icon: <MailIcon />,
+    path: "/dashboard/user-events",
+    end: false,
+  },
+  {
+    label: "Near You",
+    icon: <MapIcon />,
     path: "/dashboard/near-you",
     end: false,
   },
@@ -41,6 +55,7 @@ const navItems = [
 
 export default function SidebarNav() {
   const { logout } = useContext(AuthContext);
+  const theme = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -57,11 +72,11 @@ export default function SidebarNav() {
         [`& .MuiDrawer-paper`]: {
           width: isCollapsed ? iconOnlyWidth : drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: "#f5f5f5",
+          backgroundColor: "background.paper",
           transition: "width 0.3s ease",
           display: "flex",
           flexDirection: "column",
-          justifyContent: "space-between", // pushes logout to the bottom
+          justifyContent: "space-between",
         },
       }}
     >
@@ -74,11 +89,19 @@ export default function SidebarNav() {
             gap: "8px",
           }}
         >
-          {!isCollapsed && (
-            <Typography variant="h6" noWrap>
-              ProxiMeet
-            </Typography>
-          )}
+          <Typography
+            variant="h6"
+            noWrap
+            sx={{
+              opacity: isCollapsed ? 0 : 1,
+              transition: "opacity 0.3s ease",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              width: isCollapsed ? 0 : "auto",
+            }}
+          >
+            ProxiMeet
+          </Typography>
           <IconButton onClick={toggleSidebar}>
             {isCollapsed ? <MenuIcon /> : <ArrowBackIcon />}
           </IconButton>
@@ -99,26 +122,41 @@ export default function SidebarNav() {
                 <ListItem disablePadding>
                   <ListItemButton
                     sx={{
-                      backgroundColor: isActive ? "#e0e0e0" : "inherit",
+                      backgroundColor: isActive
+                        ? theme.palette.action.selected
+                        : "inherit",
                       borderLeft: isActive
-                        ? "4px solid #1976d2"
+                        ? `4px solid ${theme.palette.primary.main}`
                         : "4px solid transparent",
                     }}
                   >
                     <ListItemIcon
-                      sx={{ color: isActive ? "#1976d2" : "inherit" }}
+                      sx={{
+                        minWidth: 40,
+                        color: isActive
+                          ? theme.palette.primary.main
+                          : "inherit",
+                      }}
                     >
                       {item.icon}
                     </ListItemIcon>
-                    {!isCollapsed && (
-                      <ListItemText
-                        primary={item.label}
-                        primaryTypographyProps={{
-                          color: isActive ? "#1976d2" : "inherit",
-                          fontWeight: isActive ? "bold" : "normal",
-                        }}
-                      />
-                    )}
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        color: isActive
+                          ? theme.palette.primary.main
+                          : "inherit",
+                        fontWeight: isActive ? "bold" : "normal",
+                      }}
+                      sx={{
+                        opacity: isCollapsed ? 0 : 1,
+                        transition: "opacity 0.3s ease",
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        width: isCollapsed ? 0 : "auto",
+                        ml: isCollapsed ? 0 : 1,
+                      }}
+                    />
                   </ListItemButton>
                 </ListItem>
               )}
@@ -127,7 +165,7 @@ export default function SidebarNav() {
         </List>
       </Box>
 
-      {/* Logout item at the bottom of a drawer */}
+      {/* Logout section */}
       <List>
         <ListItem disablePadding>
           <ListItemButton
@@ -137,18 +175,24 @@ export default function SidebarNav() {
               borderLeft: "4px solid transparent",
             }}
           >
-            <ListItemIcon sx={{ color: "inherit" }}>
+            <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
               <ExitToApp />
             </ListItemIcon>
-            {!isCollapsed && (
-              <ListItemText
-                primary="Logout"
-                primaryTypographyProps={{
-                  color: "inherit",
-                  fontWeight: "normal",
-                }}
-              />
-            )}
+            <ListItemText
+              primary="Logout"
+              primaryTypographyProps={{
+                color: "inherit",
+                fontWeight: "normal",
+              }}
+              sx={{
+                opacity: isCollapsed ? 0 : 1,
+                transition: "opacity 0.3s ease",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                width: isCollapsed ? 0 : "auto",
+                ml: isCollapsed ? 0 : 1,
+              }}
+            />
           </ListItemButton>
         </ListItem>
       </List>

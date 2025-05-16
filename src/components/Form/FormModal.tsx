@@ -15,6 +15,7 @@ type FormModalProps<T extends string> = {
   >;
   INPUT_FIELDS_DEFINITIONS: Record<T, InputFieldDefinition>;
   VALIDATOR: Yup.ObjectSchema<Record<T, any>>;
+  onClose: () => void;
 };
 
 export default function FormModal<T extends string>({
@@ -22,11 +23,12 @@ export default function FormModal<T extends string>({
   INITIAL_VALUES,
   VALIDATOR,
   INPUT_FIELDS_DEFINITIONS,
+  onClose,
 }: FormModalProps<T>) {
   const theme = useTheme();
 
   return (
-    <Dialog open={true} maxWidth="sm" fullWidth>
+    <Dialog onClose={onClose} open={true} maxWidth="sm" fullWidth>
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
         onSubmit={handleSubmit}
@@ -38,7 +40,7 @@ export default function FormModal<T extends string>({
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                height: "80vh",
+                maxHeight: "80vh",
                 bgcolor: theme.palette.background.default,
                 borderRadius: 2,
               }}
@@ -47,6 +49,7 @@ export default function FormModal<T extends string>({
               <Box
                 sx={{
                   p: 2,
+                  bgcolor: theme.palette.background.paper,
                   borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
               >
@@ -93,9 +96,15 @@ export default function FormModal<T extends string>({
                 sx={{
                   p: 2,
                   borderTop: `1px solid ${theme.palette.divider}`,
-                  textAlign: "right",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  bgcolor: theme.palette.background.paper,
                 }}
               >
+                <Button onClick={onClose} variant="contained">
+                  Close
+                </Button>
                 <Button type="submit" variant="contained">
                   Add Event
                 </Button>

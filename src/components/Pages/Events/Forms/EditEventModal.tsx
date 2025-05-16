@@ -1,4 +1,4 @@
-import { useLoaderData, useOutletContext } from "react-router";
+import { useLoaderData, useNavigate, useOutletContext } from "react-router";
 import * as Yup from "yup";
 import { EventFields } from "./event-fields.type";
 import { InputFieldDefinition } from "../../../Form/input-field-definition.type";
@@ -83,7 +83,14 @@ export default function EditEventModal() {
       event: eventModel;
     };
   }>();
-  const { updateEvent } = useOutletContext<any>();
+
+  const { reloadEvents } = useOutletContext<{ reloadEvents: () => void }>();
+
+  const navigate = useNavigate();
+
+  const onClose = () => {
+    navigate("/dashboard/user-events");
+  };
 
   const INITIAL_DATA: submitData = {
     id: data.data.event.id,
@@ -115,8 +122,8 @@ export default function EditEventModal() {
           },
         },
       );
-      updateEvent(response.data);
-      console.log(response);
+      reloadEvents();
+      onClose();
     } catch (err) {
       console.log(err);
     }
@@ -128,6 +135,7 @@ export default function EditEventModal() {
       INPUT_FIELDS_DEFINITIONS={INPUT_FIELDS_DEFINITIONS}
       INITIAL_VALUES={{ ...INITIAL_DATA }}
       VALIDATOR={VALIDATOR}
+      onClose={onClose}
     />
   );
 }

@@ -5,6 +5,8 @@ import { EventFields } from "./event-fields.type";
 import { InputFieldDefinition } from "../../../Form/input-field-definition.type";
 import axios from "axios";
 import { AuthContext } from "../../../../authentication/auth-context";
+import { useNavigate, useOutletContext } from "react-router";
+import { useSnackbar } from "notistack";
 
 const INPUT_FIELDS_DEFINITIONS: Record<EventFields, InputFieldDefinition> = {
   name: {
@@ -81,6 +83,14 @@ type submitData = {
 
 export default function AddEventModal() {
   const { token } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+  const { reloadEvents } = useOutletContext<{ reloadEvents: () => void }>();
+
+  const onClose = () => {
+    navigate("/dashboard/user-events");
+    enqueueSnackbar("Event was added successfuly!", { variant: "success" });
+  };
 
   const handleSubmit = async (data: submitData) => {
     // Prepere data
@@ -101,7 +111,9 @@ export default function AddEventModal() {
           },
         },
       );
-      console.log(response);
+      reloadEvents();
+      enqueueSnackbar("Event was added successfuly!", { variant: "success" });
+      onClose();
     } catch (err) {
       console.log(err);
     }
@@ -113,6 +125,7 @@ export default function AddEventModal() {
       INPUT_FIELDS_DEFINITIONS={INPUT_FIELDS_DEFINITIONS}
       INITIAL_VALUES={{ ...INITIAL_VALUES }}
       VALIDATOR={VALIDATOR}
+      onClose={onClose}
     />
   );
 }
