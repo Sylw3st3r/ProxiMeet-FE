@@ -8,6 +8,9 @@ import FormButton from "../../Form/FormButton";
 import axios from "axios";
 import { AuthContext } from "../../../authentication/auth-context";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import { client } from "../../..";
+import { useSnackbar } from "notistack";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
@@ -34,28 +37,31 @@ const INITIAL_VALUES = {
   password: "",
 };
 
+const handleSubmit = async (data: any) => {
+  return await axios.post("http://localhost:3001/users/signin", data);
+};
+
 export default function SignIn() {
   const { setUserData } = useContext(AuthContext);
   const { t } = useTranslation();
   const theme = useTheme();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: handleSubmit,
+    onSuccess: (response) => {
+      setUserData(response.data);
+    },
+    onError: () => {
+      enqueueSnackbar("Couldn't add event!", { variant: "error" });
+    },
+  });
+  const { enqueueSnackbar } = useSnackbar();
 
   const navigate = useNavigate();
 
   function handleClick() {
     navigate("/signup");
   }
-
-  const handleSubmit = async (data: any) => {
-    try {
-      const response = await axios.post(
-        "http://localhost:3001/users/signin",
-        data,
-      );
-      setUserData(response.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
 
   return (
     <Box
@@ -69,7 +75,7 @@ export default function SignIn() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={handleSubmit}
+        onSubmit={(data: any) => mutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -97,7 +103,7 @@ export default function SignIn() {
               <FormInput variant="standard" key={index} {...definition} />
             ))}
 
-            <FormButton>Signin</FormButton>
+            <FormButton loading={isPending}>Signin</FormButton>
 
             <Typography
               textAlign="center"
@@ -107,7 +113,11 @@ export default function SignIn() {
               {t("or")}
             </Typography>
 
-            <Button onClick={handleClick} variant="outlined">
+            <Button
+              loading={isPending}
+              onClick={handleClick}
+              variant="outlined"
+            >
               {t("signup")}
             </Button>
           </Box>

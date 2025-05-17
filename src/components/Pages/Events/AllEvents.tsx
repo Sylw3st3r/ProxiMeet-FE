@@ -1,21 +1,15 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  CardContent,
-  CardMedia,
-  Typography,
-  Card,
+  Grid,
   Box,
   useTheme,
   Pagination,
   TextField,
   Button,
-  LinearProgress,
-  Collapse,
-  Divider,
   Toolbar,
+  LinearProgress,
   Select,
   MenuItem,
-  Grid,
 } from "@mui/material";
 import { Outlet, useNavigate } from "react-router";
 import axios from "axios";
@@ -32,29 +26,28 @@ const getData = async (
   limit: number,
 ) => {
   const response = await axios.get(
-    `http://localhost:3001/events/own?search=${search}&page=${page}&limit=${limit}`,
+    `http://localhost:3001/events/all?search=${search}&page=${page}&limit=${limit}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      signal,
     },
   );
   return response.data;
 };
 
-const UserEvents = () => {
+export default function AllEvents() {
   const { token } = useContext(AuthContext);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState("");
+  const [limit, setLimit] = useState(20);
 
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["user-events", { search, page, limit }],
+  const cardWidth = 220;
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["events", { search, page, limit }],
     queryFn: ({ signal }) => getData(signal, token, search, page, limit),
   });
-
-  const navigate = useNavigate();
 
   return (
     <Box>
@@ -68,38 +61,19 @@ const UserEvents = () => {
           setLimit,
           totalPages: data?.totalPages,
         }}
-      >
-        <Button
-          variant={"contained"}
-          onClick={() => {
-            navigate("add");
-          }}
-        >
-          Add
-        </Button>
-      </AllEventsToolbar>
+      ></AllEventsToolbar>
       {isLoading ? (
         <LinearProgress color="primary" />
       ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {(data as any).events.map((item: any, index: number) => (
-            <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
-              <EventCard
-                onEditClick={() => {
-                  {
-                    navigate(`edit/${item.id}`);
-                  }
-                }}
-                key={item.id}
-                event={item}
-              ></EventCard>
+            <Grid key={index} style={{ flexGrow: 1, maxWidth: cardWidth }}>
+              <EventCard key={item.id} event={item}></EventCard>
             </Grid>
           ))}
         </Grid>
       )}
-      <Outlet context={{ refetch }}></Outlet>
+      <Outlet></Outlet>
     </Box>
   );
-};
-
-export default UserEvents;
+}

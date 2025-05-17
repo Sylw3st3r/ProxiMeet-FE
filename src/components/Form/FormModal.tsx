@@ -5,7 +5,7 @@ import ImageUpload from "./ImageUpload";
 import FormInput from "./Input";
 import { InputFieldDefinition } from "./input-field-definition.type";
 import * as Yup from "yup";
-import LocationPicker from "./LocationPicker";
+import LocationPicker from "./FormLocationPicker";
 
 type FormModalProps<T extends string> = {
   handleSubmit: any;
@@ -16,6 +16,7 @@ type FormModalProps<T extends string> = {
   INPUT_FIELDS_DEFINITIONS: Record<T, InputFieldDefinition>;
   VALIDATOR: Yup.ObjectSchema<Record<T, any>>;
   onClose: () => void;
+  loading: boolean;
 };
 
 export default function FormModal<T extends string>({
@@ -23,6 +24,7 @@ export default function FormModal<T extends string>({
   INITIAL_VALUES,
   VALIDATOR,
   INPUT_FIELDS_DEFINITIONS,
+  loading,
   onClose,
 }: FormModalProps<T>) {
   const theme = useTheme();
@@ -105,7 +107,7 @@ export default function FormModal<T extends string>({
                 <Button onClick={onClose} variant="contained">
                   Close
                 </Button>
-                <Button type="submit" variant="contained">
+                <Button loading={loading} type="submit" variant="contained">
                   Add Event
                 </Button>
               </Box>

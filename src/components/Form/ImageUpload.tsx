@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
-import { useField, useFormikContext } from "formik";
+import { useField } from "formik";
 import { useTranslation } from "react-i18next";
 import {
   Box,

@@ -1,46 +1,24 @@
-# Getting Started with Create React App
+# ProxiMeet
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a modern web application built with React and TypeScript, designed to deliver a responsive, maintainable, and scalable user interface. It incorporates Material UI for a sleek and consistent design system, while React Router handles seamless client-side routing. Internationalization is supported using i18next, enabling multi-language support and localization flexibility. The application features robust CRUD (Create, Read, Update, Delete) functionality, allowing users to manage data efficiently. Additionally, it includes authentication and authorization mechanisms to secure access. This tech stack ensures the application is well-suited for both development and production environments, emphasizing code quality, user experience, and security.,
 
-## Available Scripts
+### Work in Progress
 
-In the project directory, you can run:
+## BE
 
-### `npm start`
+[BE for this project can be found here](https://github.com/Sylw3st3r/be-event-planner).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## TODO
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Refresh token
+Generating new verification key if the old one has expired
+Password reset
+Add option of deleting event
+Picking time range when creating/editing an event
+Users should have an option of marking selected event as observed.
+Users should recieve information if event that was being observed by them was edited (sending email or creating inbox)
+Users should be informed if observed events overlap time vise
+Multiple fallback views in case of data failing to fetch data
+Users should have another view (schedule) where all observed events can be seen
+Finishing internalization (prepering translation files and replaceing harcoded text)
+Cleanup (code splitting and refactoring)

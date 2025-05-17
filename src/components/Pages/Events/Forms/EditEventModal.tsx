@@ -6,6 +6,9 @@ import { useContext } from "react";
 import { AuthContext } from "../../../../authentication/auth-context";
 import FormModal from "../../../Form/FormModal";
 import axios from "axios";
+import { useMutation } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
+import { client } from "../../../..";
 
 const INPUT_FIELDS_DEFINITIONS: Record<EventFields, InputFieldDefinition> = {
   name: {
@@ -76,6 +79,32 @@ type eventModel = {
   lng: number;
 };
 
+const handleSubmit = async ({
+  data,
+  token,
+}: {
+  data: submitData;
+  token: string | null;
+}) => {
+  // Prepere data
+  const requestData = new FormData();
+  requestData.append("name", data.name);
+  requestData.append("description", data.description);
+  requestData.append("image", data.image);
+  requestData.append("lat", `${data.location.lat}`);
+  requestData.append("lng", `${data.location.lng}`);
+
+  return await axios.patch(
+    `http://localhost:3001/events/edit/${data.id}`,
+    requestData,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
+};
+
 export default function EditEventModal() {
   const { token } = useContext(AuthContext);
   const data = useLoaderData<{
@@ -84,7 +113,18 @@ export default function EditEventModal() {
     };
   }>();
 
-  const { reloadEvents } = useOutletContext<{ reloadEvents: () => void }>();
+  const { mutate, isPending } = useMutation({
+    mutationFn: handleSubmit,
+    onSuccess: async () => {
+      client.invalidateQueries({ queryKey: ["user-events"] });
+      client.invalidateQueries({ queryKey: ["events"] });
+      enqueueSnackbar("Event eddited successfuly!", { variant: "success" });
+    },
+    onError: () => {
+      enqueueSnackbar("Couldn't edit event!", { variant: "error" });
+    },
+  });
+  const { enqueueSnackbar } = useSnackbar();
 
   const navigate = useNavigate();
 
@@ -103,39 +143,14 @@ export default function EditEventModal() {
     },
   };
 
-  const handleSubmit = async (data: submitData) => {
-    // Prepere data
-    const requestData = new FormData();
-    requestData.append("name", data.name);
-    requestData.append("description", data.description);
-    requestData.append("image", data.image);
-    requestData.append("lat", `${data.location.lat}`);
-    requestData.append("lng", `${data.location.lng}`);
-
-    try {
-      const response = await axios.patch(
-        `http://localhost:3001/events/edit/${data.id}`,
-        requestData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-      reloadEvents();
-      onClose();
-    } catch (err) {
-      console.log(err);
-    }
-  };
-
   return (
     <FormModal<EventFields>
-      handleSubmit={handleSubmit}
+      handleSubmit={(data: submitData) => mutate({ data, token })}
       INPUT_FIELDS_DEFINITIONS={INPUT_FIELDS_DEFINITIONS}
       INITIAL_VALUES={{ ...INITIAL_DATA }}
       VALIDATOR={VALIDATOR}
       onClose={onClose}
+      loading={isPending}
     />
   );
 }

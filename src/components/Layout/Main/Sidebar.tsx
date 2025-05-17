@@ -12,8 +12,9 @@ import {
   IconButton,
   Box,
   useTheme,
+  Switch,
+  useColorScheme,
 } from "@mui/material";
-import InboxIcon from "@mui/icons-material/Inbox";
 import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
 import MapIcon from "@mui/icons-material/Map";
@@ -57,6 +58,7 @@ export default function SidebarNav() {
   const { logout } = useContext(AuthContext);
   const theme = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const { mode, setMode } = useColorScheme();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -166,7 +168,20 @@ export default function SidebarNav() {
       </Box>
 
       {/* Logout section */}
-      <List>
+      <List
+        sx={{
+          justifyContent: "center",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Switch
+          value={mode === "light" ? "dark" : "light"}
+          onClick={() => {
+            setMode(mode === "light" ? "dark" : "light");
+          }}
+        />
         <ListItem disablePadding>
           <ListItemButton
             onClick={logout}

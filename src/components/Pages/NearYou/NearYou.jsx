@@ -25,6 +25,7 @@ import { Icon } from "leaflet";
 
 import marker from "../../../assets/red-pin.png";
 import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
 const myIcon = new Icon({
   iconUrl: marker,
   iconRetinaUrl: marker,
@@ -64,57 +65,47 @@ export function CustomPopup({ name, image, description }) {
 const KM_TO_M = 1000;
 const MILES_TO_M = 1609.34;
 
+const getData = async (signal, lat, lng, radius, unit, token) => {
+  const response = await axios.get(
+    `http://localhost:3001/events/near?lat=${lat}&lng=${lng}&radius=${radius}&unit=${unit}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      signal,
+    },
+  );
+
+  return response.data.events;
+};
+
 export default function NearYou() {
   const { token } = useContext(AuthContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [events, setEvents] = useState([]);
   const [radius, setRadius] = useState(50);
   const [unit, setUnit] = useState("km");
-
+  const [location, setLocation] = useState(null);
   const theme = useTheme();
 
-  const [location, setLocation] = useState(null);
-  const [error, setError] = useState(null);
+  const { data } = useQuery({
+    queryKey: ["near-events", { radius, unit, location }],
+    queryFn: ({ signal }) =>
+      getData(signal, location.lat, location.lng, radius, unit, token),
+    enabled: location !== null,
+  });
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser");
       return;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-      },
-      (err) => {
-        setError(`Error: ${err.message}`);
-      },
-    );
+    navigator.geolocation.getCurrentPosition((position) => {
+      setLocation({
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      });
+    });
   }, []);
-
-  const getData = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:3001/events/near?lat=${location.lat}&lng=${location.lng}&radius=${radius}&unit=${unit}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      );
-
-      setEvents(response.data.events);
-    } catch {}
-  };
-
-  useEffect(() => {
-    if (location) {
-      getData();
-    }
-  }, [location, radius, unit]);
 
   // Component that shows a marker in selected location
   const LocationMarker = () => {
@@ -179,7 +170,7 @@ export default function NearYou() {
           pathOptions={{ color: theme.palette.primary, fillOpacity: 0.2 }}
         />
         <LocationMarker />
-        {events.map((event) => {
+        {(data || []).map((event) => {
           return (
             <Marker
               eventHandlers={{ click: () => setSelectedEvent(event) }}

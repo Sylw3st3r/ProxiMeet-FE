@@ -38,17 +38,6 @@ export async function reverseGeocodeOSM(lat: number, lon: number) {
   }
 }
 
-export function useDebounce<T>(value: T, delay: number): T {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(handler);
-  }, [value, delay]);
-
-  return debounced;
-}
-
 export default function LocationPicker({ name, label }: any) {
   const [field, meta, helpers] = useField(name);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);

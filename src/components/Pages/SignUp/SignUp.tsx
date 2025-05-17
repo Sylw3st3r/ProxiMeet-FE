@@ -5,8 +5,10 @@ import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router";
+import { useMutation } from "@tanstack/react-query";
+import { useSnackbar } from "notistack";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
@@ -61,22 +63,29 @@ const INITIAL_VALUES = {
   matchingPassword: "",
 };
 
+const handleSubmit = async (data: any) => {
+  return await axios.put("http://localhost:3001/users/signup", data);
+};
+
 export default function SignUp() {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
 
-  const handleSubmit = async (data: any) => {
-    try {
-      const response = await axios.put(
-        "http://localhost:3001/users/signup",
-        data,
+  const { mutate, isPending } = useMutation({
+    mutationFn: handleSubmit,
+    onSuccess: () => {
+      handleClick();
+    },
+    onError: (error: any) => {
+      enqueueSnackbar(
+        error.response?.data?.errorDescription ||
+          "Something went wrong! Try again later",
+        { variant: "error" },
       );
-      console.log(response);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    },
+  });
+  const { enqueueSnackbar } = useSnackbar();
 
   const handleClick = () => {
     navigate("/");
@@ -94,7 +103,7 @@ export default function SignUp() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={handleSubmit}
+        onSubmit={(data: any) => mutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -122,7 +131,7 @@ export default function SignUp() {
               <FormInput variant="standard" key={index} {...definition} />
             ))}
 
-            <FormButton>signup</FormButton>
+            <FormButton loading={isPending}>signup</FormButton>
 
             <Typography
               textAlign="center"
@@ -132,7 +141,11 @@ export default function SignUp() {
               {t("or")}
             </Typography>
 
-            <Button onClick={handleClick} variant="outlined">
+            <Button
+              loading={isPending}
+              onClick={handleClick}
+              variant="outlined"
+            >
               {t("signin")}
             </Button>
           </Box>
