@@ -4,7 +4,7 @@ This project is a modern web application built with React and TypeScript, design
 
 ### Work in Progress
 
-This is work in progress. Many of the styles are subjected to possible change. Many of the features aren't ready yet (see TODO). In some places we don't have translations ready and because of that one can notice text that looks like: "name.label", "password/label". These things 
+This is work in progress. Many of the styles are subjected to possible change. Many of the features aren't ready yet (see TODO). In some places we don't have translations ready and because of that one can notice text that looks like: "name.label", "password/label". These things will be replaced in the future.
 
 ![Obraz 17 05 2025, godz  13 11](https://github.com/user-attachments/assets/572c26c6-e7f4-463e-9ee0-a067c9632ee6)
 ![Obraz 17 05 2025, godz  13 10 (2)](https://github.com/user-attachments/assets/256e1394-3620-4dc0-8198-399e0d110b12)
