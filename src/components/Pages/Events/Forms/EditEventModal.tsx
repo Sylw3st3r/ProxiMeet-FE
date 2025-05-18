@@ -97,11 +97,6 @@ const handleSubmit = async ({
   return await axios.patch(
     `http://localhost:3001/events/edit/${data.id}`,
     requestData,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
   );
 };
 

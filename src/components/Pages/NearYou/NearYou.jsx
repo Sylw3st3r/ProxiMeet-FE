@@ -65,13 +65,10 @@ export function CustomPopup({ name, image, description }) {
 const KM_TO_M = 1000;
 const MILES_TO_M = 1609.34;
 
-const getData = async (signal, lat, lng, radius, unit, token) => {
+const getData = async (signal, lat, lng, radius, unit) => {
   const response = await axios.get(
     `http://localhost:3001/events/near?lat=${lat}&lng=${lng}&radius=${radius}&unit=${unit}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       signal,
     },
   );
@@ -90,7 +87,7 @@ export default function NearYou() {
   const { data } = useQuery({
     queryKey: ["near-events", { radius, unit, location }],
     queryFn: ({ signal }) =>
-      getData(signal, location.lat, location.lng, radius, unit, token),
+      getData(signal, location.lat, location.lng, radius, unit),
     enabled: location !== null,
   });
 

@@ -20,7 +20,6 @@ import AllEventsToolbar from "./AllEventsToolbar";
 
 const getData = async (
   signal: AbortSignal,
-  token: string | null,
   search: string,
   page: number,
   limit: number,
@@ -28,16 +27,13 @@ const getData = async (
   const response = await axios.get(
     `http://localhost:3001/events/all?search=${search}&page=${page}&limit=${limit}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      signal,
     },
   );
   return response.data;
 };
 
 export default function AllEvents() {
-  const { token } = useContext(AuthContext);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(20);
@@ -46,7 +42,7 @@ export default function AllEvents() {
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["events", { search, page, limit }],
-    queryFn: ({ signal }) => getData(signal, token, search, page, limit),
+    queryFn: ({ signal }) => getData(signal, search, page, limit),
   });
 
   return (

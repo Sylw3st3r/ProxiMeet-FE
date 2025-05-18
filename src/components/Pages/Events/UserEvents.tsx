@@ -26,7 +26,6 @@ import AllEventsToolbar from "./AllEventsToolbar";
 
 const getData = async (
   signal: AbortSignal,
-  token: string | null,
   search: string,
   page: number,
   limit: number,
@@ -34,9 +33,6 @@ const getData = async (
   const response = await axios.get(
     `http://localhost:3001/events/own?search=${search}&page=${page}&limit=${limit}`,
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
       signal,
     },
   );
@@ -51,7 +47,7 @@ const UserEvents = () => {
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["user-events", { search, page, limit }],
-    queryFn: ({ signal }) => getData(signal, token, search, page, limit),
+    queryFn: ({ signal }) => getData(signal, search, page, limit),
   });
 
   const navigate = useNavigate();

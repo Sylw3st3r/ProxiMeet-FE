@@ -7,6 +7,7 @@ import AuthProvider from "./authentication/AuthProvider";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import AxiosInterceptor from "./interceptor/AxiosInterceptor";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -16,20 +17,22 @@ export const client = new QueryClient();
 
 root.render(
   <React.StrictMode>
-    <AuthProvider>
-      <QueryClientProvider client={client}>
-        <ThemeProvider
-          theme={createTheme({
-            colorSchemes: {
-              dark: true,
-            },
-          })}
-        >
-          <SnackbarProvider autoHideDuration={4000}>
-            <App />
-          </SnackbarProvider>
-        </ThemeProvider>
-      </QueryClientProvider>
-    </AuthProvider>
+    <ThemeProvider
+      theme={createTheme({
+        colorSchemes: {
+          dark: true,
+        },
+      })}
+    >
+      <SnackbarProvider autoHideDuration={4000}>
+        <AuthProvider>
+          <AxiosInterceptor>
+            <QueryClientProvider client={client}>
+              <App />
+            </QueryClientProvider>
+          </AxiosInterceptor>
+        </AuthProvider>
+      </SnackbarProvider>
+    </ThemeProvider>
   </React.StrictMode>,
 );

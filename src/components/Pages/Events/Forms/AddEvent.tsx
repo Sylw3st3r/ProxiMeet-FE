@@ -98,11 +98,7 @@ const handleSubmit = async ({
   requestData.append("lat", `${data.location.lat}`);
   requestData.append("lng", `${data.location.lng}`);
 
-  return await axios.put(`http://localhost:3001/events/add`, requestData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  return await axios.put(`http://localhost:3001/events/add`, requestData);
 };
 
 export default function AddEventModal() {
