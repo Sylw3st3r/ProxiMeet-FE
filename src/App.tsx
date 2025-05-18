@@ -23,6 +23,8 @@ import "leaflet/dist/leaflet.css";
 import UserEvents from "./components/Pages/Events/UserEvents";
 import { useColorScheme } from "@mui/material";
 import AllEvents from "./components/Pages/Events/AllEvents";
+import RequestPasswordReset from "./components/Pages/RequestPasswordReset/RequestPasswordReset";
+import PasswordReset from "./components/Pages/PasswordReset/PasswordReset";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -80,12 +82,14 @@ const createRouter = (token: string | null) =>
         {
           path: "/verify/:token",
           Component: VerifyAccount,
-          errorElement: <VerifyFaied />,
-          loader: async ({ params }) => {
-            return axios.get(
-              `http://localhost:3001/users/verify/${params.token}`,
-            );
-          },
+        },
+        {
+          path: "/request-password-reset",
+          Component: RequestPasswordReset,
+        },
+        {
+          path: "/password-reset/:token",
+          Component: PasswordReset,
         },
       ],
     },
