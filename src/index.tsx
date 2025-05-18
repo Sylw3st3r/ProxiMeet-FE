@@ -8,6 +8,7 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AxiosInterceptor from "./interceptor/AxiosInterceptor";
+import LocationProvider from "./location/LocationProvider";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -26,11 +27,13 @@ root.render(
     >
       <SnackbarProvider autoHideDuration={4000}>
         <AuthProvider>
-          <AxiosInterceptor>
-            <QueryClientProvider client={client}>
-              <App />
-            </QueryClientProvider>
-          </AxiosInterceptor>
+          <LocationProvider>
+            <AxiosInterceptor>
+              <QueryClientProvider client={client}>
+                <App />
+              </QueryClientProvider>
+            </AxiosInterceptor>
+          </LocationProvider>
         </AuthProvider>
       </SnackbarProvider>
     </ThemeProvider>

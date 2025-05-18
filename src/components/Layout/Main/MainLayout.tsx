@@ -3,13 +3,23 @@ import { Navigate, Outlet } from "react-router";
 import { AuthContext } from "../../../authentication/auth-context";
 import { Box, useTheme } from "@mui/material";
 import SidebarNav from "./Sidebar";
+import { LocationContext } from "../../../location/location-context";
+import LocationRequiredView from "../../Pages/LocationRequiredView";
 
 export default function MainLayout() {
   const { isLoggedIn } = useContext(AuthContext);
+  const { location } = useContext(LocationContext);
   const theme = useTheme();
 
-  // Layout with sidenav. If user hasnt sign in the we redirect to "/"
-  return isLoggedIn ? (
+  if (!isLoggedIn) {
+    return <Navigate to="/" />;
+  }
+
+  if (!location) {
+    return <LocationRequiredView />;
+  }
+
+  return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "row" }}>
       <SidebarNav />
       <Box
@@ -22,7 +32,5 @@ export default function MainLayout() {
         <Outlet />
       </Box>
     </Box>
-  ) : (
-    <Navigate to="/" />
   );
 }

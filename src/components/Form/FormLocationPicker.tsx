@@ -10,13 +10,14 @@ import {
   useTheme,
 } from "@mui/material";
 import { useField } from "formik";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
 import { Icon } from "leaflet";
 
 import marker from "../../assets/red-pin.png";
+import { LocationContext } from "../../location/location-context";
 
 const myIcon = new Icon({
   iconUrl: marker,
@@ -39,47 +40,38 @@ export async function reverseGeocodeOSM(lat: number, lon: number) {
 }
 
 export default function LocationPicker({ name, label }: any) {
+  const { location } = useContext(LocationContext);
   const [field, meta, helpers] = useField(name);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
-  const [location, setLocation] = useState(field.value || null);
+  const [pickedLocation, setPickedLocation] = useState(field.value || location);
   const [address, setAddress] = useState("");
   const theme = useTheme();
   const { t } = useTranslation();
 
-  useEffect(() => {
-    if (!location && navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const userLoc = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        };
-        const addr = await reverseGeocodeOSM(userLoc.lat, userLoc.lng);
-        setLocation(userLoc);
-        helpers.setValue(userLoc);
-        setAddress(addr);
-      });
-    }
-  }, []);
-
   const handleSaveOfPickedLocation = useCallback(async () => {
-    if (location) {
-      const addr = await reverseGeocodeOSM(location.lat, location.lng);
-      helpers.setValue(location);
-      helpers.setTouched(false);
-      setAddress(addr);
-    }
+    const addr = await reverseGeocodeOSM(
+      pickedLocation.lat,
+      pickedLocation.lng,
+    );
+    helpers.setValue(pickedLocation);
+    helpers.setTouched(false);
+    setAddress(addr);
     setMapDialogOpen(false);
-  }, [location]);
+  }, [pickedLocation]);
+
+  useEffect(() => {
+    handleSaveOfPickedLocation();
+  }, []);
 
   // Component that shows a marker in selected location
   const LocationMarker = () => {
     useMapEvents({
       click(e) {
-        setLocation(e.latlng as any);
+        setPickedLocation(e.latlng as any);
       },
     });
 
-    return location ? <Marker icon={myIcon} position={location} /> : null;
+    return <Marker icon={myIcon} position={pickedLocation} />;
   };
 
   const showError = Boolean(meta.error && meta.touched);
@@ -130,9 +122,7 @@ export default function LocationPicker({ name, label }: any) {
               px: 0,
             }}
           >
-            {location
-              ? `[${location.lat}, ${location.lng}]`
-              : t("Drag 'n' drop an image here, or click to select")}
+            {`[${pickedLocation.lat}, ${pickedLocation.lng}]`}
           </Typography>
         </Box>
 
@@ -160,7 +150,7 @@ export default function LocationPicker({ name, label }: any) {
             }}
           >
             <MapContainer
-              center={[location.lat, location.lng]} // Default center
+              center={[pickedLocation.lat, pickedLocation.lng]} // Default center
               zoom={14}
               style={{ height: "100%", width: "100%" }}
             >

@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../../authentication/auth-context";
+import React, { useContext, useState } from "react";
 import {
   Box,
   Card,
@@ -26,6 +25,7 @@ import { Icon } from "leaflet";
 import marker from "../../../assets/red-pin.png";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
+import { LocationContext } from "../../../location/location-context";
 const myIcon = new Icon({
   iconUrl: marker,
   iconRetinaUrl: marker,
@@ -77,45 +77,31 @@ const getData = async (signal, lat, lng, radius, unit) => {
 };
 
 export default function NearYou() {
-  const { token } = useContext(AuthContext);
+  const { location } = useContext(LocationContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [radius, setRadius] = useState(50);
   const [unit, setUnit] = useState("km");
-  const [location, setLocation] = useState(null);
+  const [pickedLocation, setPickedLocation] = useState(location);
   const theme = useTheme();
 
   const { data } = useQuery({
-    queryKey: ["near-events", { radius, unit, location }],
+    queryKey: ["near-events", { radius, unit, pickedLocation }],
     queryFn: ({ signal }) =>
-      getData(signal, location.lat, location.lng, radius, unit),
-    enabled: location !== null,
+      getData(signal, pickedLocation.lat, pickedLocation.lng, radius, unit),
   });
-
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition((position) => {
-      setLocation({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-    });
-  }, []);
 
   // Component that shows a marker in selected location
   const LocationMarker = () => {
     useMapEvent({
       click(e) {
-        setLocation(e.latlng);
+        setPickedLocation(e.latlng);
       },
     });
 
-    return location ? <Marker icon={myIcon} position={location} /> : null;
+    return <Marker icon={myIcon} position={pickedLocation} />;
   };
 
-  return location ? (
+  return (
     <Box
       flexDirection={"column"}
       style={{ height: "100vh", width: "100%", display: "flex" }}
@@ -153,7 +139,7 @@ export default function NearYou() {
         </Select>
       </Toolbar>
       <MapContainer
-        center={[location.lat, location.lng]}
+        center={[pickedLocation.lat, pickedLocation.lng]}
         zoom={9}
         style={{ flex: 1 }}
       >
@@ -162,7 +148,7 @@ export default function NearYou() {
           attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
         />
         <Circle
-          center={[location.lat, location.lng]}
+          center={[pickedLocation.lat, pickedLocation.lng]}
           radius={radius * (unit === "km" ? KM_TO_M : MILES_TO_M)}
           pathOptions={{ color: theme.palette.primary, fillOpacity: 0.2 }}
         />
@@ -201,7 +187,5 @@ export default function NearYou() {
         </Dialog>
       ) : null}
     </Box>
-  ) : (
-    <Typography>No location</Typography>
   );
 }
