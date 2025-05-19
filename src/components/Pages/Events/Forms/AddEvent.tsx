@@ -1,37 +1,12 @@
-import React, { useContext, useRef, useState } from "react";
+import React from "react";
 import * as Yup from "yup";
-import FormModal from "../../../Form/FormModal";
-import { EventFields } from "./event-fields.type";
-import { InputFieldDefinition } from "../../../Form/input-field-definition.type";
+import { eventSubmitData } from "./EventEntityFormModal";
 import axios from "axios";
-import { AuthContext } from "../../../../authentication/auth-context";
-import { useLocation, useNavigate, useOutletContext } from "react-router";
+import { useNavigate } from "react-router";
 import { useSnackbar } from "notistack";
 import { useMutation } from "@tanstack/react-query";
 import { client } from "../../../..";
-
-const INPUT_FIELDS_DEFINITIONS: Record<EventFields, InputFieldDefinition> = {
-  name: {
-    label: "name.label",
-    placeholder: "name.placeholder",
-    type: "text",
-  },
-  description: {
-    label: "description.label",
-    placeholder: "description.placeholder",
-    type: "text",
-  },
-  image: {
-    label: "image.label",
-    placeholder: "image.placeholder",
-    type: "image",
-  },
-  location: {
-    label: "location.label",
-    placeholder: "location.placeholder",
-    type: "location",
-  },
-};
+import EventEntityFormModal from "./EventEntityFormModal";
 
 const coordinatesSchema = Yup.object({
   lat: Yup.number()
@@ -44,7 +19,7 @@ const coordinatesSchema = Yup.object({
     .max(180, "Longitude must be less than or equal to 180"),
 });
 
-const VALIDATOR: Yup.ObjectSchema<Record<EventFields, any>> = Yup.object({
+const VALIDATOR = Yup.object({
   name: Yup.string().required("name.required"),
   description: Yup.string().required("description.required"),
   image: Yup.mixed()
@@ -56,40 +31,32 @@ const VALIDATOR: Yup.ObjectSchema<Record<EventFields, any>> = Yup.object({
       );
     }),
   location: coordinatesSchema.required("Location is required"),
+  dateTimeRange: Yup.object({
+    start: Yup.date()
+      .required("Start date is required")
+      .typeError("Start date must be a valid date"),
+    end: Yup.date()
+      .required("End date is required")
+      .typeError("End date must be a valid date")
+      .min(
+        Yup.ref("start"),
+        "End date must be later than or equal to start date",
+      ),
+  }).required("Date range is required"),
 });
 
-const INITIAL_VALUES: Record<
-  EventFields,
-  | string
-  | null
-  | {
-      lat: number;
-      lng: number;
-    }
-> = {
+const INITIAL_VALUES = {
   name: "",
   description: "",
   image: null,
   location: null,
+  dateTimeRange: {
+    start: null,
+    end: null,
+  },
 };
 
-type submitData = {
-  name: string;
-  description: string;
-  image: string | Blob;
-  location: {
-    lat: number;
-    lng: number;
-  };
-};
-
-const handleSubmit = async ({
-  data,
-  token,
-}: {
-  data: submitData;
-  token: string | null;
-}) => {
+const handleSubmit = async (data: eventSubmitData) => {
   // Prepere data
   const requestData = new FormData();
   requestData.append("name", data.name);
@@ -97,12 +64,13 @@ const handleSubmit = async ({
   requestData.append("image", data.image);
   requestData.append("lat", `${data.location.lat}`);
   requestData.append("lng", `${data.location.lng}`);
+  requestData.append("start", `${data.dateTimeRange.start.toISOString()}`);
+  requestData.append("end", `${data.dateTimeRange.end.toISOString()}`);
 
   return await axios.put(`http://localhost:3001/events/add`, requestData);
 };
 
 export default function AddEventModal() {
-  const { token } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation({
@@ -123,13 +91,16 @@ export default function AddEventModal() {
   };
 
   return (
-    <FormModal<EventFields>
-      handleSubmit={(data: submitData) => mutate({ data, token })}
-      INPUT_FIELDS_DEFINITIONS={INPUT_FIELDS_DEFINITIONS}
+    <EventEntityFormModal
+      handleSubmit={(data) => {
+        mutate(data);
+      }}
       INITIAL_VALUES={{ ...INITIAL_VALUES }}
       VALIDATOR={VALIDATOR}
       onClose={onClose}
       loading={isPending}
+      headerText="Add event"
+      submitButtonText="Add"
     />
   );
 }

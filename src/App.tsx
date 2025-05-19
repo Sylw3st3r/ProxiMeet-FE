@@ -11,7 +11,6 @@ import EditEventModal from "./components/Pages/Events/Forms/EditEventModal";
 import axios from "axios";
 import UnauthorizedLayout from "./components/Layout/Unauthorized/UnauthorizedLayout";
 import VerifyAccount from "./components/Pages/Verify/VerifyAccount";
-import VerifyFaied from "./components/Pages/Verify/VerificationFailed";
 import AddEventModal from "./components/Pages/Events/Forms/AddEvent";
 import NearYou from "./components/Pages/NearYou/NearYou";
 
@@ -25,6 +24,7 @@ import { useColorScheme } from "@mui/material";
 import AllEvents from "./components/Pages/Events/AllEvents";
 import RequestPasswordReset from "./components/Pages/RequestPasswordReset/RequestPasswordReset";
 import PasswordReset from "./components/Pages/PasswordReset/PasswordReset";
+import Schedule from "./components/Pages/Schedule/Schedule";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -68,6 +68,10 @@ const createRouter = (token: string | null) =>
           path: "near-you",
           Component: NearYou,
         },
+        {
+          path: "schedule",
+          Component: Schedule,
+        },
       ],
     },
     {
@@ -84,7 +88,7 @@ const createRouter = (token: string | null) =>
           Component: VerifyAccount,
         },
         {
-          path: "/request-password-reset",
+          path: "/password-reset",
           Component: RequestPasswordReset,
         },
         {

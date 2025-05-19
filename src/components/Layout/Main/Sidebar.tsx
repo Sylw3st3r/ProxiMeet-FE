@@ -20,7 +20,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import MapIcon from "@mui/icons-material/Map";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { ExitToApp } from "@mui/icons-material";
+import { CalendarViewDay, ExitToApp } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../../authentication/auth-context";
 
@@ -50,6 +50,12 @@ const navItems = [
     label: "Near You",
     icon: <MapIcon />,
     path: "/dashboard/near-you",
+    end: false,
+  },
+  {
+    label: "Schedule",
+    icon: <CalendarViewDay></CalendarViewDay>,
+    path: "/dashboard/schedule",
     end: false,
   },
 ];

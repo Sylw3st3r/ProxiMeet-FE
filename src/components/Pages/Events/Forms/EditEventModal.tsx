@@ -1,37 +1,10 @@
-import { useLoaderData, useNavigate, useOutletContext } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import * as Yup from "yup";
-import { EventFields } from "./event-fields.type";
-import { InputFieldDefinition } from "../../../Form/input-field-definition.type";
-import { useContext } from "react";
-import { AuthContext } from "../../../../authentication/auth-context";
-import FormModal from "../../../Form/FormModal";
 import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { client } from "../../../..";
-
-const INPUT_FIELDS_DEFINITIONS: Record<EventFields, InputFieldDefinition> = {
-  name: {
-    label: "name.label",
-    placeholder: "name.placeholder",
-    type: "text",
-  },
-  description: {
-    label: "description.label",
-    placeholder: "description.placeholder",
-    type: "text",
-  },
-  image: {
-    label: "image.label",
-    placeholder: "image.placeholder",
-    type: "image",
-  },
-  location: {
-    label: "location.label",
-    placeholder: "location.placeholder",
-    type: "location",
-  },
-};
+import EventEntityFormModal, { eventSubmitData } from "./EventEntityFormModal";
 
 const coordinatesSchema = Yup.object({
   lat: Yup.number()
@@ -44,7 +17,7 @@ const coordinatesSchema = Yup.object({
     .max(180, "Longitude must be less than or equal to 180"),
 });
 
-const VALIDATOR: Yup.ObjectSchema<Record<EventFields, any>> = Yup.object({
+const VALIDATOR = Yup.object({
   name: Yup.string().required("name.required"),
   description: Yup.string().required("description.required"),
   image: Yup.mixed()
@@ -57,18 +30,19 @@ const VALIDATOR: Yup.ObjectSchema<Record<EventFields, any>> = Yup.object({
       );
     }),
   location: coordinatesSchema.required("Location is required"),
+  dateTimeRange: Yup.object({
+    start: Yup.date()
+      .required("Start date is required")
+      .typeError("Start date must be a valid date"),
+    end: Yup.date()
+      .required("End date is required")
+      .typeError("End date must be a valid date")
+      .min(
+        Yup.ref("start"),
+        "End date must be later than or equal to start date",
+      ),
+  }).required("Date range is required"),
 });
-
-type submitData = {
-  id: number;
-  name: string;
-  description: string;
-  image: string | Blob;
-  location: {
-    lat: number;
-    lng: number;
-  };
-};
 
 type eventModel = {
   id: number;
@@ -77,15 +51,11 @@ type eventModel = {
   image: string;
   lat: number;
   lng: number;
+  start: string;
+  end: string;
 };
 
-const handleSubmit = async ({
-  data,
-  token,
-}: {
-  data: submitData;
-  token: string | null;
-}) => {
+const handleSubmit = async (data: eventSubmitData) => {
   // Prepere data
   const requestData = new FormData();
   requestData.append("name", data.name);
@@ -93,6 +63,8 @@ const handleSubmit = async ({
   requestData.append("image", data.image);
   requestData.append("lat", `${data.location.lat}`);
   requestData.append("lng", `${data.location.lng}`);
+  requestData.append("start", `${data.dateTimeRange.start.toISOString()}`);
+  requestData.append("end", `${data.dateTimeRange.end.toISOString()}`);
 
   return await axios.patch(
     `http://localhost:3001/events/edit/${data.id}`,
@@ -101,7 +73,6 @@ const handleSubmit = async ({
 };
 
 export default function EditEventModal() {
-  const { token } = useContext(AuthContext);
   const data = useLoaderData<{
     data: {
       event: eventModel;
@@ -127,7 +98,7 @@ export default function EditEventModal() {
     navigate("/dashboard/user-events");
   };
 
-  const INITIAL_DATA: submitData = {
+  const INITIAL_VALUES = {
     id: data.data.event.id,
     name: data.data.event.name,
     description: data.data.event.description,
@@ -136,16 +107,23 @@ export default function EditEventModal() {
       lat: data.data.event.lat,
       lng: data.data.event.lng,
     },
+    dateTimeRange: {
+      start: new Date(data.data.event.start),
+      end: new Date(data.data.event.end),
+    },
   };
 
   return (
-    <FormModal<EventFields>
-      handleSubmit={(data: submitData) => mutate({ data, token })}
-      INPUT_FIELDS_DEFINITIONS={INPUT_FIELDS_DEFINITIONS}
-      INITIAL_VALUES={{ ...INITIAL_DATA }}
+    <EventEntityFormModal
+      handleSubmit={(data) => {
+        mutate(data);
+      }}
+      INITIAL_VALUES={{ ...INITIAL_VALUES }}
       VALIDATOR={VALIDATOR}
       onClose={onClose}
       loading={isPending}
+      headerText="Edit event"
+      submitButtonText="Edit"
     />
   );
 }
