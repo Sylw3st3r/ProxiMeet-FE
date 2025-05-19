@@ -55,7 +55,7 @@ const navItems = [
 ];
 
 export default function SidebarNav() {
-  const { logout } = useContext(AuthContext);
+  const { logOut } = useContext(AuthContext);
   const theme = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { mode, setMode } = useColorScheme();
@@ -184,7 +184,7 @@ export default function SidebarNav() {
         />
         <ListItem disablePadding>
           <ListItemButton
-            onClick={logout}
+            onClick={logOut}
             sx={{
               backgroundColor: "inherit",
               borderLeft: "4px solid transparent",

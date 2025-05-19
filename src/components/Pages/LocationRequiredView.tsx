@@ -18,7 +18,7 @@ import { AuthContext } from "../../authentication/auth-context";
 
 export default function LocationRequiredView() {
   const { requestingLocation } = useContext(LocationContext);
-  const { logout } = useContext(AuthContext);
+  const { logOut } = useContext(AuthContext);
   const { t } = useTranslation();
   const theme = useTheme();
 
@@ -55,7 +55,7 @@ export default function LocationRequiredView() {
             {t("Welcome to the ProxiMeet")}
           </Typography>
           <Box flex={1}></Box>
-          {!requestingLocation && <Button onClick={logout}>Logout</Button>}
+          {!requestingLocation && <Button onClick={logOut}>Logout</Button>}
         </Box>
 
         {requestingLocation ? (

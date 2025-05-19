@@ -26,15 +26,15 @@ root.render(
       })}
     >
       <SnackbarProvider autoHideDuration={4000}>
-        <AuthProvider>
-          <LocationProvider>
-            <AxiosInterceptor>
-              <QueryClientProvider client={client}>
+        <QueryClientProvider client={client}>
+          <AuthProvider>
+            <LocationProvider>
+              <AxiosInterceptor>
                 <App />
-              </QueryClientProvider>
-            </AxiosInterceptor>
-          </LocationProvider>
-        </AuthProvider>
+              </AxiosInterceptor>
+            </LocationProvider>
+          </AuthProvider>
+        </QueryClientProvider>
       </SnackbarProvider>
     </ThemeProvider>
   </React.StrictMode>,

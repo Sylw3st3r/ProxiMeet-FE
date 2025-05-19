@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
@@ -19,10 +19,7 @@ const INITIAL_VALUES = {
 };
 
 const handleSubmit = async (data: { email: string }) => {
-  return await axios.post(
-    "http://localhost:3001/users/request-password-reset",
-    data,
-  );
+  return axios.post("http://localhost:3001/users/request-password-reset", data);
 };
 
 export default function RequestPasswordReset() {

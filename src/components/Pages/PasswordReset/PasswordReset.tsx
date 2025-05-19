@@ -8,7 +8,6 @@ import FormButton from "../../Form/FormButton";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useSnackbar } from "notistack";
 
 const VALIDATOR = Yup.object({
   token: Yup.string().required("token.required"),
@@ -19,12 +18,6 @@ const VALIDATOR = Yup.object({
       return this.parent.password === value;
     }),
 });
-
-const INITIAL_VALUES = {
-  token: "",
-  password: "",
-  matchingPassword: "",
-};
 
 const handleSubmit = async (data: {
   token: string;
@@ -52,7 +45,7 @@ export default function PasswordReset() {
     navigate("/");
   };
 
-  return params.token ? (
+  return (
     <Box
       sx={{
         height: "100vh",
@@ -133,7 +126,5 @@ export default function PasswordReset() {
         </Form>
       </Formik>
     </Box>
-  ) : (
-    <></>
   );
 }

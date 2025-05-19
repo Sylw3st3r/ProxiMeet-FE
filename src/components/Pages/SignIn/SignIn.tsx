@@ -42,14 +42,14 @@ const handleSubmit = async (data: any) => {
 };
 
 export default function SignIn() {
-  const { setUserData } = useContext(AuthContext);
+  const { logIn } = useContext(AuthContext);
   const { t } = useTranslation();
   const theme = useTheme();
 
   const { mutate, isPending } = useMutation({
     mutationFn: handleSubmit,
     onSuccess: (response) => {
-      setUserData(response.data);
+      logIn(response.data);
     },
     onError: () => {
       enqueueSnackbar("Couldn't add event!", { variant: "error" });

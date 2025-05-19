@@ -1,11 +1,9 @@
-import React, { useContext } from "react";
-import { AuthContext } from "../../../authentication/auth-context";
+import React from "react";
 import { Typography, Paper, Box, Button, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 export default function Home() {
-  const { logout } = useContext(AuthContext);
   const { t } = useTranslation();
   const theme = useTheme();
 
