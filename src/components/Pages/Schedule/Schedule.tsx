@@ -7,6 +7,7 @@ import {
   IconButton,
   useTheme,
   LinearProgress,
+  Toolbar,
 } from "@mui/material";
 import {
   ChevronLeft,
@@ -114,8 +115,18 @@ const Schedule = () => {
   };
 
   return (
-    <Box p={2}>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
+    <Box position={"relative"}>
+      <Toolbar
+        sx={{
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          position: "sticky",
+          top: 0,
+          zIndex: 200,
+          bgcolor: theme.palette.background.paper,
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+        }}
+      >
         <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange}>
           <ToggleButton value="day">Day</ToggleButton>
           <ToggleButton value="week">Week</ToggleButton>
@@ -132,21 +143,23 @@ const Schedule = () => {
             <ChevronRight />
           </IconButton>
         </Box>
-      </Box>
+      </Toolbar>
 
-      <Box mt={2} mb={1}>
-        {renderHeader()}
+      <Box p={2}>
+        <Box mt={2} mb={1}>
+          {renderHeader()}
+        </Box>
+        {isPending && <LinearProgress></LinearProgress>}
+        {renderBody(
+          (data?.events || []).map((event: { start: string; end: string }) => {
+            return {
+              ...event,
+              start: new Date(event.start),
+              end: new Date(event.end),
+            };
+          }),
+        )}
       </Box>
-      {isPending && <LinearProgress></LinearProgress>}
-      {renderBody(
-        (data?.events || []).map((event: { start: string; end: string }) => {
-          return {
-            ...event,
-            start: new Date(event.start),
-            end: new Date(event.end),
-          };
-        }),
-      )}
     </Box>
   );
 };
@@ -237,7 +250,15 @@ const WeekView = ({ date, items }: any) => {
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
 
   return (
-    <Box display="flex">
+    <Box
+      sx={{
+        display: "grid",
+        maxWidth: "1100px",
+        marginY: 0,
+        gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+        width: "100%",
+      }}
+    >
       {days.map((day) => {
         const dayStart = new Date(day.setHours(0, 0, 0, 0));
         const dayEnd = new Date(day.setHours(23, 59, 59, 999));
@@ -249,8 +270,9 @@ const WeekView = ({ date, items }: any) => {
         return (
           <Box
             key={day.toISOString()}
-            flex={1}
+            sx={{ aspectRatio: 1, overflow: "hidden" }}
             border={`1px solid ${theme.palette.divider}`}
+            bgcolor={theme.palette.background.paper}
             p={1}
           >
             <Typography variant="subtitle2" color={theme.palette.text.primary}>
@@ -296,7 +318,6 @@ const MonthView = ({ date, items }: any) => {
         display: "grid",
         maxWidth: "1100px",
         marginY: 0,
-        marginX: "auto",
         gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
         width: "100%",
       }}
@@ -312,8 +333,8 @@ const MonthView = ({ date, items }: any) => {
             sx={{ aspectRatio: 1, overflow: "hidden" }}
             key={day}
             border={`1px solid ${theme.palette.divider}`}
+            bgcolor={theme.palette.background.paper}
             p={1}
-            minHeight={80}
           >
             <Typography
               color={theme.palette.text.primary}

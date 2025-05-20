@@ -40,7 +40,11 @@ export default function AuthProvider({ children }) {
       return response.data.token;
     },
     onSuccess: (newToken) => {
-      setContext((oldContext) => ({ ...oldContext, token: newToken }));
+      setContext((oldContext) => {
+        const newContext = { ...oldContext, token: newToken };
+        localStorage.setItem("userData", JSON.stringify(newContext));
+        return newContext;
+      });
     },
     onError: () => {
       logOut();

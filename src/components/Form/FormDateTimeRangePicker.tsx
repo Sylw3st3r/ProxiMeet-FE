@@ -33,6 +33,7 @@ export default function FormDateTimeRange({
           label={t(labelStart)}
           value={startField.value}
           onChange={(val) => handleChange(`${name}.start`, val)}
+          ampm={false}
           slotProps={{
             textField: {
               fullWidth: true,
@@ -47,6 +48,7 @@ export default function FormDateTimeRange({
           label={t(labelEnd)}
           value={endField.value}
           onChange={(val) => handleChange(`${name}.end`, val)}
+          ampm={false}
           slotProps={{
             textField: {
               fullWidth: true,

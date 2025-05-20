@@ -1,28 +1,16 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  CardContent,
-  CardMedia,
-  Typography,
-  Card,
-  Box,
-  useTheme,
-  Pagination,
-  TextField,
-  Button,
-  LinearProgress,
-  Collapse,
-  Divider,
-  Toolbar,
-  Select,
-  MenuItem,
-  Grid,
-} from "@mui/material";
+import React, { useState } from "react";
+import { Box, Button, LinearProgress, Grid } from "@mui/material";
 import { Outlet, useNavigate } from "react-router";
 import axios from "axios";
-import { AuthContext } from "../../../authentication/auth-context";
-import { useQuery } from "@tanstack/react-query";
-import EventCard from "./EventCard";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import AllEventsToolbar from "./AllEventsToolbar";
+import { client } from "../../..";
+import EventCard from "./EventCard";
+import DeleteEventConfirmationPrompt from "./Forms/DeleteEventConfirmationPrompt";
+
+const deleteEventRequest = async (event: any) => {
+  return await axios.delete(`http://localhost:3001/events/delete/${event.id}`);
+};
 
 const getData = async (
   signal: AbortSignal,
@@ -40,15 +28,35 @@ const getData = async (
 };
 
 const UserEvents = () => {
-  const { token } = useContext(AuthContext);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState("");
+  const [selectedCard, setSelectedCard] = useState<any>(null);
+  const [deletionConfirmationOpen, setDeletionConfirmationOpen] =
+    useState(false);
 
-  const { data, isLoading, refetch } = useQuery({
+  const { mutate: deleteEvent, isPending: deletionPending } = useMutation({
+    mutationFn: deleteEventRequest,
+    onSuccess: async () => {
+      client.invalidateQueries({ queryKey: ["user-events"] });
+      client.invalidateQueries({ queryKey: ["events"] });
+      setSelectedCard(null);
+      closeDeletionConfirmationPrompt();
+    },
+  });
+
+  const { data, isPending } = useQuery({
     queryKey: ["user-events", { search, page, limit }],
     queryFn: ({ signal }) => getData(signal, search, page, limit),
   });
+
+  const openDeletionConfirmationPrompt = () => {
+    setDeletionConfirmationOpen(true);
+  };
+
+  const closeDeletionConfirmationPrompt = () => {
+    setDeletionConfirmationOpen(false);
+  };
 
   const navigate = useNavigate();
 
@@ -73,27 +81,55 @@ const UserEvents = () => {
         >
           Add
         </Button>
+        <Box flex={1} />
+        <Button
+          disabled={!selectedCard || isPending}
+          variant={"contained"}
+          onClick={() => {
+            navigate(`edit/${selectedCard}`);
+          }}
+        >
+          Edit
+        </Button>
+        <Box flex={1} />
+
+        <Button
+          disabled={!selectedCard || isPending}
+          variant={"contained"}
+          onClick={openDeletionConfirmationPrompt}
+        >
+          Delete
+        </Button>
       </AllEventsToolbar>
-      {isLoading ? (
+      {isPending ? (
         <LinearProgress color="primary" />
       ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {(data as any).events.map((item: any, index: number) => (
             <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
               <EventCard
-                onEditClick={() => {
-                  {
-                    navigate(`edit/${item.id}`);
-                  }
-                }}
                 key={item.id}
                 event={item}
-              ></EventCard>
+                selected={item.id === selectedCard?.id}
+                setSelected={() => {
+                  item.id === selectedCard?.id
+                    ? setSelectedCard(null)
+                    : setSelectedCard(item);
+                }}
+              />
             </Grid>
           ))}
         </Grid>
       )}
-      <Outlet context={{ refetch }}></Outlet>
+      {deletionConfirmationOpen && (
+        <DeleteEventConfirmationPrompt
+          deleteEvent={deleteEvent}
+          isPending={deletionPending}
+          handleClose={closeDeletionConfirmationPrompt}
+          event={selectedCard}
+        ></DeleteEventConfirmationPrompt>
+      )}
+      <Outlet></Outlet>
     </Box>
   );
 };

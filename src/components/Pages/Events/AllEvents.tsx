@@ -1,19 +1,7 @@
-import React, { useContext, useEffect, useState } from "react";
-import {
-  Grid,
-  Box,
-  useTheme,
-  Pagination,
-  TextField,
-  Button,
-  Toolbar,
-  LinearProgress,
-  Select,
-  MenuItem,
-} from "@mui/material";
-import { Outlet, useNavigate } from "react-router";
+import React, { useState } from "react";
+import { Grid, Box, LinearProgress } from "@mui/material";
+import { Outlet } from "react-router";
 import axios from "axios";
-import { AuthContext } from "../../../authentication/auth-context";
 import { useQuery } from "@tanstack/react-query";
 import EventCard from "./EventCard";
 import AllEventsToolbar from "./AllEventsToolbar";
@@ -38,9 +26,9 @@ export default function AllEvents() {
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(20);
 
-  const cardWidth = 220;
+  const [selectedCard, setSelectedCard] = useState<any>(null);
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["events", { search, page, limit }],
     queryFn: ({ signal }) => getData(signal, search, page, limit),
   });
@@ -63,8 +51,17 @@ export default function AllEvents() {
       ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {(data as any).events.map((item: any, index: number) => (
-            <Grid key={index} style={{ flexGrow: 1, maxWidth: cardWidth }}>
-              <EventCard key={item.id} event={item}></EventCard>
+            <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
+              <EventCard
+                key={item.id}
+                event={item}
+                selected={item.id === selectedCard?.id}
+                setSelected={() => {
+                  item.id === selectedCard?.id
+                    ? setSelectedCard(null)
+                    : setSelectedCard(item);
+                }}
+              />
             </Grid>
           ))}
         </Grid>
