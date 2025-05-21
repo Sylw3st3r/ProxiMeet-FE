@@ -27,11 +27,16 @@ This is work in progress. Many of the styles are subjected to possible change. M
 - ~~Password reset~~
 - ~~Add option of deleting event~~
 - ~~Picking time range when creating/editing an event~~
-- Users should have an option of marking selected event as observed
+- ~~Users should have an option of marking selected event as observed~~
 - Users should receive information if event that was being observed by them was edited (sending email or creating inbox)
-- Users should be informed if observed events overlap time-wise
+- ~~Users should be informed if observed events overlap time-wise~~
 - Multiple fallback views in case of data failing to fetch
 - ~~Users should have another view (schedule) where all observed events can be seen~~
 - Finishing internalization (preparing translation files and replacing hardcoded text)
 - Cleanup (code splitting and refactoring)
+- Unit tests
+- e2e tests
+- Design improvements
+- User personal data change
+- More flters and sorting options
 
