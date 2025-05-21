@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import {
   Box,
   ToggleButton,
@@ -28,41 +28,25 @@ import {
   startOfMonth,
   endOfMonth,
 } from "date-fns";
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { AuthContext } from "../../../authentication/auth-context";
+import { getAllEventsData } from "../../../vendor/events-vendor";
+import { Event } from "../../../model/event";
 
-const getData = async (
-  signal: AbortSignal,
-  search: string,
-  page: number,
-  limit: number,
-) => {
-  const response = await axios.get(
-    `http://localhost:3001/events/all?search=${search}&page=${page}&limit=${limit}`,
-    {
-      signal,
-    },
-  );
-  return response.data;
-};
+type mode = "day" | "week" | "month";
 
 const Schedule = () => {
-  const { isLoggedIn } = useContext(AuthContext);
+  const [mode, setMode] = useState<mode>("day"); // day | week | month
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const { isPending, data } = useQuery({
     queryKey: ["events"],
-    queryFn: ({ signal }) => getData(signal, "", 1, 50),
-    enabled: isLoggedIn,
+    queryFn: ({ signal }) => getAllEventsData(signal, "", 1, 50),
   });
 
   const theme = useTheme();
 
-  const [mode, setMode] = useState("day"); // day | week | month
-  const [currentDate, setCurrentDate] = useState(new Date());
-
-  const handleModeChange = (_: any, newMode: any) => {
-    if (newMode !== null) setMode(newMode);
+  const handleModeChange = (_: unknown, newMode: mode) => {
+    setMode(newMode);
   };
 
   const goToToday = () => setCurrentDate(new Date());
@@ -84,7 +68,7 @@ const Schedule = () => {
   };
 
   const renderHeader = () => {
-    let label = "";
+    let label;
     if (mode === "day") {
       label = format(currentDate, "eeee, MMM d");
     } else if (mode === "week") {
@@ -101,14 +85,21 @@ const Schedule = () => {
     );
   };
 
-  const renderBody = (scheduleItems: any) => {
+  const renderBody = (
+    scheduleEvents: {
+      start: Date;
+      end: Date;
+      name: string;
+      id: number;
+    }[],
+  ) => {
     switch (mode) {
       case "day":
-        return <DayView items={scheduleItems} date={currentDate} />;
+        return <DayView events={scheduleEvents} date={currentDate} />;
       case "week":
-        return <WeekView items={scheduleItems} date={currentDate} />;
+        return <WeekView events={scheduleEvents} date={currentDate} />;
       case "month":
-        return <MonthView items={scheduleItems} date={currentDate} />;
+        return <MonthView events={scheduleEvents} date={currentDate} />;
       default:
         return null;
     }
@@ -151,7 +142,7 @@ const Schedule = () => {
         </Box>
         {isPending && <LinearProgress></LinearProgress>}
         {renderBody(
-          (data?.events || []).map((event: { start: string; end: string }) => {
+          (data?.events || []).map((event) => {
             return {
               ...event,
               start: new Date(event.start),
@@ -166,15 +157,21 @@ const Schedule = () => {
 
 const hourSectionHeight = 50;
 
-const DayView = ({ date, items }: any) => {
+const DayView = ({
+  date,
+  events,
+}: {
+  date: Date;
+  events: { start: Date; end: Date; name: string; id: number }[];
+}) => {
   const theme = useTheme();
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const dayStart = new Date(date.setHours(0, 0, 0, 0));
   const dayEnd = new Date(date.setHours(23, 59, 59, 999));
 
-  const dayItems = items.filter((item: any) => {
-    return item.end > dayStart && item.start < dayEnd;
+  const dayEvents = events.filter((event) => {
+    return event.end > dayStart && event.start < dayEnd;
   });
 
   return (
@@ -194,9 +191,9 @@ const DayView = ({ date, items }: any) => {
       ))}
       {isToday(date) && <TimeIndicator />}
 
-      {dayItems.map((item: any) => {
-        const start = item.start < dayStart ? dayStart : item.start;
-        const end = item.end > dayEnd ? dayEnd : item.end;
+      {dayEvents.map((event) => {
+        const start = event.start < dayStart ? dayStart : event.start;
+        const end = event.end > dayEnd ? dayEnd : event.end;
 
         const startHour = start.getHours() + start.getMinutes() / 60;
         const endHour = end.getHours() + end.getMinutes() / 60;
@@ -205,7 +202,7 @@ const DayView = ({ date, items }: any) => {
 
         return (
           <Box
-            key={item.id}
+            key={event.id}
             position="absolute"
             left={80}
             right={10}
@@ -217,7 +214,7 @@ const DayView = ({ date, items }: any) => {
             p={0.5}
             boxShadow={1}
           >
-            <Typography variant="caption">{item.name}</Typography>
+            <Typography variant="caption">{event.name}</Typography>
           </Box>
         );
       })}
@@ -244,7 +241,13 @@ const TimeIndicator = () => {
   );
 };
 
-const WeekView = ({ date, items }: any) => {
+const WeekView = ({
+  date,
+  events,
+}: {
+  date: Date;
+  events: { start: Date; end: Date; name: string; id: number }[];
+}) => {
   const theme = useTheme();
   const start = startOfWeek(date);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
@@ -263,7 +266,7 @@ const WeekView = ({ date, items }: any) => {
         const dayStart = new Date(day.setHours(0, 0, 0, 0));
         const dayEnd = new Date(day.setHours(23, 59, 59, 999));
 
-        const dayItems = items.filter((item: any) => {
+        const dayEvents = events.filter((item) => {
           return item.end > dayStart && item.start < dayEnd;
         });
 
@@ -278,9 +281,9 @@ const WeekView = ({ date, items }: any) => {
             <Typography variant="subtitle2" color={theme.palette.text.primary}>
               {format(day, "EEE dd")}
             </Typography>
-            {dayItems.map((item: any) => (
+            {dayEvents.map((event) => (
               <Box
-                key={item.id}
+                key={event.id}
                 mt={1}
                 p={1}
                 bgcolor={theme.palette.secondary.main}
@@ -290,7 +293,7 @@ const WeekView = ({ date, items }: any) => {
                   variant="caption"
                   color={theme.palette.secondary.contrastText}
                 >
-                  {item.name}
+                  {event.name}
                 </Typography>
               </Box>
             ))}
@@ -301,7 +304,13 @@ const WeekView = ({ date, items }: any) => {
   );
 };
 
-const MonthView = ({ date, items }: any) => {
+const MonthView = ({
+  date,
+  events,
+}: {
+  date: Date;
+  events: { start: Date; end: Date; name: string; id: number }[];
+}) => {
   const theme = useTheme();
   const start = startOfMonth(date);
   const end = endOfMonth(date);
@@ -324,14 +333,14 @@ const MonthView = ({ date, items }: any) => {
       gap={0.5}
     >
       {days.map((day) => {
-        const dayItems = items.filter(
-          (item: any) => item.start.toDateString() === day.toDateString(),
+        const dayEvents = events.filter(
+          (event) => event.start.toDateString() === day.toDateString(),
         );
 
         return (
           <Box
             sx={{ aspectRatio: 1, overflow: "hidden" }}
-            key={day}
+            key={day.toDateString()}
             border={`1px solid ${theme.palette.divider}`}
             bgcolor={theme.palette.background.paper}
             p={1}
@@ -343,9 +352,9 @@ const MonthView = ({ date, items }: any) => {
             >
               {format(day, "d")}
             </Typography>
-            {dayItems.map((item: any) => (
+            {dayEvents.map((event) => (
               <Box
-                key={item.id}
+                key={event.id}
                 mt={0.5}
                 p={0.5}
                 bgcolor={theme.palette.secondary.main}
@@ -355,7 +364,7 @@ const MonthView = ({ date, items }: any) => {
                   color={theme.palette.secondary.contrastText}
                   variant="caption"
                 >
-                  {item.name}
+                  {event.name}
                 </Typography>
               </Box>
             ))}

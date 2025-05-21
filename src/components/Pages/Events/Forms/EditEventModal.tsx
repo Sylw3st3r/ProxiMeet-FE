@@ -1,10 +1,12 @@
-import { useLoaderData, useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import * as Yup from "yup";
 import axios from "axios";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { client } from "../../../..";
 import EventEntityFormModal, { eventSubmitData } from "./EventEntityFormModal";
+import { getEvent } from "../../../../vendor/events-vendor";
+import { LinearProgress } from "@mui/material";
 
 const coordinatesSchema = Yup.object({
   lat: Yup.number()
@@ -44,17 +46,6 @@ const VALIDATOR = Yup.object({
   }).required("Date range is required"),
 });
 
-type eventModel = {
-  id: number;
-  name: string;
-  description: string;
-  image: string;
-  lat: number;
-  lng: number;
-  start: string;
-  end: string;
-};
-
 const handleSubmit = async (data: eventSubmitData) => {
   // Prepere data
   const requestData = new FormData();
@@ -73,11 +64,15 @@ const handleSubmit = async (data: eventSubmitData) => {
 };
 
 export default function EditEventModal() {
-  const data = useLoaderData<{
-    data: {
-      event: eventModel;
-    };
-  }>();
+  let { id } = useParams();
+
+  const validId = !(!id || isNaN(Number(id)) || Number(id) < 1);
+
+  const { data: eventData, isPending: eventPending } = useQuery({
+    queryKey: ["events", { id }],
+    queryFn: ({ signal }) => getEvent(signal, Number(id)),
+    enabled: validId,
+  });
 
   const { mutate, isPending } = useMutation({
     mutationFn: handleSubmit,
@@ -90,26 +85,33 @@ export default function EditEventModal() {
       enqueueSnackbar("Couldn't edit event!", { variant: "error" });
     },
   });
+
   const { enqueueSnackbar } = useSnackbar();
-
   const navigate = useNavigate();
-
   const onClose = () => {
     navigate("/dashboard/user-events");
   };
 
+  if (eventPending) {
+    return <LinearProgress></LinearProgress>;
+  }
+
+  if (!eventData) {
+    return <></>;
+  }
+
   const INITIAL_VALUES = {
-    id: data.data.event.id,
-    name: data.data.event.name,
-    description: data.data.event.description,
-    image: data.data.event.image,
+    id: eventData.id,
+    name: eventData.name,
+    description: eventData.description,
+    image: eventData.image,
     location: {
-      lat: data.data.event.lat,
-      lng: data.data.event.lng,
+      lat: eventData.lat,
+      lng: eventData.lng,
     },
     dateTimeRange: {
-      start: new Date(data.data.event.start),
-      end: new Date(data.data.event.end),
+      start: new Date(eventData.start),
+      end: new Date(eventData.end),
     },
   };
 

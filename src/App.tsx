@@ -8,7 +8,6 @@ import PageNotFound from "./components/Pages/PageNotFound/PageNotFund";
 import SignUp from "./components/Pages/SignUp/SignUp";
 import { AuthContext } from "./authentication/auth-context";
 import EditEventModal from "./components/Pages/Events/Forms/EditEventModal";
-import axios from "axios";
 import UnauthorizedLayout from "./components/Layout/Unauthorized/UnauthorizedLayout";
 import VerifyAccount from "./components/Pages/Verify/VerifyAccount";
 import AddEventModal from "./components/Pages/Events/Forms/AddEvent";
@@ -54,13 +53,6 @@ const createRouter = (token: string | null) =>
             {
               path: "edit/:id",
               Component: EditEventModal,
-              loader: async ({ params }) => {
-                return axios.get(`http://localhost:3001/events/${params.id}`, {
-                  headers: {
-                    Authorization: `Bearer ${token}`,
-                  },
-                });
-              },
             },
           ],
         },

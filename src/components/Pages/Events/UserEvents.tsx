@@ -1,67 +1,58 @@
 import React, { useState } from "react";
-import { Box, Button, LinearProgress, Grid } from "@mui/material";
+import { Box, Button, LinearProgress, Grid, ButtonGroup } from "@mui/material";
 import { Outlet, useNavigate } from "react-router";
 import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import AllEventsToolbar from "./AllEventsToolbar";
 import { client } from "../../..";
 import EventCard from "./EventCard";
-import DeleteEventConfirmationPrompt from "./Forms/DeleteEventConfirmationPrompt";
-
-const deleteEventRequest = async (event: any) => {
-  return await axios.delete(`http://localhost:3001/events/delete/${event.id}`);
-};
-
-const getData = async (
-  signal: AbortSignal,
-  search: string,
-  page: number,
-  limit: number,
-) => {
-  const response = await axios.get(
-    `http://localhost:3001/events/own?search=${search}&page=${page}&limit=${limit}`,
-    {
-      signal,
-    },
-  );
-  return response.data;
-};
+import {
+  deleteEventRequest,
+  getAllUserData,
+} from "../../../vendor/events-vendor";
+import { useConfirm } from "../../../hooks/useConfirm";
+import { Event } from "../../../model/event";
 
 const UserEvents = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState("");
-  const [selectedCard, setSelectedCard] = useState<any>(null);
-  const [deletionConfirmationOpen, setDeletionConfirmationOpen] =
-    useState(false);
+  const { confirm, ConfirmDialogComponent } = useConfirm();
 
-  const { mutate: deleteEvent, isPending: deletionPending } = useMutation({
-    mutationFn: deleteEventRequest,
-    onSuccess: async () => {
-      client.invalidateQueries({ queryKey: ["user-events"] });
-      client.invalidateQueries({ queryKey: ["events"] });
-      setSelectedCard(null);
-      closeDeletionConfirmationPrompt();
-    },
-  });
+  // Check if there are ovelpaing events
+  // If yes then confirm with user that we want to proceed
+  // If no then proceed automaticly
+  const deleteEventRequestHandler = async (event: Event) => {
+    const userConfirmed = await confirm({
+      title: `Are you sure you want to delete ${event.name}?`,
+      message: "Event will be delited permanently",
+    });
+    if (!userConfirmed) {
+      return;
+    }
+
+    return deleteEventRequest(event.id);
+  };
+
+  const { mutate: deleteEventMutation, isPending: deletionPending } =
+    useMutation({
+      mutationFn: deleteEventRequestHandler,
+      onSuccess: async () => {
+        client.invalidateQueries({ queryKey: ["user-events"] });
+        client.invalidateQueries({ queryKey: ["events"] });
+      },
+    });
 
   const { data, isPending } = useQuery({
     queryKey: ["user-events", { search, page, limit }],
-    queryFn: ({ signal }) => getData(signal, search, page, limit),
+    queryFn: ({ signal }) => getAllUserData(signal, search, page, limit),
   });
-
-  const openDeletionConfirmationPrompt = () => {
-    setDeletionConfirmationOpen(true);
-  };
-
-  const closeDeletionConfirmationPrompt = () => {
-    setDeletionConfirmationOpen(false);
-  };
 
   const navigate = useNavigate();
 
   return (
     <Box>
+      {ConfirmDialogComponent}
       <AllEventsToolbar
         {...{
           search,
@@ -74,6 +65,7 @@ const UserEvents = () => {
         }}
       >
         <Button
+          disabled={deletionPending}
           variant={"contained"}
           onClick={() => {
             navigate("add");
@@ -82,52 +74,40 @@ const UserEvents = () => {
           Add
         </Button>
         <Box flex={1} />
-        <Button
-          disabled={!selectedCard || isPending}
-          variant={"contained"}
-          onClick={() => {
-            navigate(`edit/${selectedCard}`);
-          }}
-        >
-          Edit
-        </Button>
-        <Box flex={1} />
-
-        <Button
-          disabled={!selectedCard || isPending}
-          variant={"contained"}
-          onClick={openDeletionConfirmationPrompt}
-        >
-          Delete
-        </Button>
       </AllEventsToolbar>
       {isPending ? (
         <LinearProgress color="primary" />
-      ) : (
+      ) : data ? (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
-          {(data as any).events.map((item: any, index: number) => (
+          {data.events.map((event, index: number) => (
             <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
-              <EventCard
-                key={item.id}
-                event={item}
-                selected={item.id === selectedCard?.id}
-                setSelected={() => {
-                  item.id === selectedCard?.id
-                    ? setSelectedCard(null)
-                    : setSelectedCard(item);
-                }}
-              />
+              <EventCard key={event.id} event={event}>
+                <ButtonGroup>
+                  <Button
+                    disabled={deletionPending}
+                    onClick={() => {
+                      navigate(`edit/${event.id}`);
+                    }}
+                    size="small"
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    loading={deletionPending}
+                    onClick={() => {
+                      deleteEventMutation(event);
+                    }}
+                    size="small"
+                  >
+                    Delete
+                  </Button>
+                </ButtonGroup>
+              </EventCard>
             </Grid>
           ))}
         </Grid>
-      )}
-      {deletionConfirmationOpen && (
-        <DeleteEventConfirmationPrompt
-          deleteEvent={deleteEvent}
-          isPending={deletionPending}
-          handleClose={closeDeletionConfirmationPrompt}
-          event={selectedCard}
-        ></DeleteEventConfirmationPrompt>
+      ) : (
+        <Box />
       )}
       <Outlet></Outlet>
     </Box>
