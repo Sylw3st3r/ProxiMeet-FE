@@ -3,7 +3,6 @@ import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
-import FormButton from "../../Form/FormButton";
 import { useNavigate, useParams } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { resetPassword } from "../../../vendor/auth-vendor";
@@ -36,6 +35,10 @@ export default function PasswordReset() {
     navigate("/");
   };
 
+  if (!params.token) {
+    return <></>;
+  }
+
   return (
     <Box
       sx={{
@@ -52,7 +55,7 @@ export default function PasswordReset() {
           password: "",
           matchingPassword: "",
         }}
-        onSubmit={(data: any) => mutate(data)}
+        onSubmit={(data) => mutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -96,7 +99,9 @@ export default function PasswordReset() {
               }}
             />
 
-            <FormButton loading={isPending}>signup</FormButton>
+            <Button loading={isPending} type="submit" variant="contained">
+              Reset password
+            </Button>
 
             <Typography
               textAlign="center"

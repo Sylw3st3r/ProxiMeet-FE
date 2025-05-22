@@ -16,15 +16,19 @@ import {
 import ClearIcon from "@mui/icons-material/Clear";
 import Cropper from "react-easy-crop";
 
-// TODO: Fix this workaround
-const CropperComponent = Cropper as unknown as React.ComponentType<any>;
+type Area = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 
 export const getCroppedImg = async (
   imageSrc: string,
-  crop: { x: number; y: number },
-  zoom: number,
-  aspect: number,
-  croppedAreaPixels: any,
+  _1: { x: number; y: number },
+  _2: number,
+  _3: number,
+  croppedAreaPixels: Area,
 ): Promise<Blob> => {
   const image = await createImage(imageSrc);
   const canvas = document.createElement("canvas");
@@ -63,17 +67,25 @@ const createImage = (url: string): Promise<HTMLImageElement> =>
     image.src = url;
   });
 
-export default function ImageUpload({ name, label, aspect = 16 / 9 }: any) {
+export default function ImageUpload({
+  name,
+  label,
+  aspect = 16 / 9,
+}: {
+  name: string;
+  label: string;
+  aspect?: number;
+}) {
   const [field, meta, helpers] = useField(name);
   const { t } = useTranslation();
 
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
-  const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [cropDialogOpen, setCropDialogOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
 
-  const onCropComplete = useCallback((_: any, croppedPixels: any) => {
+  const onCropComplete = useCallback((_: unknown, croppedPixels: Area) => {
     setCroppedAreaPixels(croppedPixels);
   }, []);
 
@@ -198,15 +210,15 @@ export default function ImageUpload({ name, label, aspect = 16 / 9 }: any) {
             bgcolor: "black",
           }}
         >
-          <CropperComponent
-            image={imageSrc!}
-            crop={crop}
-            zoom={zoom}
-            aspect={aspect}
-            onCropChange={setCrop}
-            onZoomChange={setZoom}
-            onCropComplete={onCropComplete}
-          />
+          {React.createElement(Cropper as any, {
+            image: imageSrc!,
+            crop: crop,
+            zoom: zoom,
+            aspect: aspect,
+            onCropChange: setCrop,
+            onZoomChange: setZoom,
+            onCropComplete: onCropComplete,
+          })}
         </Box>
         <Box p={2}>
           <Typography gutterBottom>{t("Zoom")}</Typography>

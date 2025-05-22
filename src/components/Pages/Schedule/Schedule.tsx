@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   ToggleButton,
@@ -27,9 +27,11 @@ import {
   endOfWeek,
   startOfMonth,
   endOfMonth,
+  startOfDay,
+  endOfDay,
 } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
-import { getAllEventsData } from "../../../vendor/events-vendor";
+import { getScheduleEvents } from "../../../vendor/events-vendor";
 
 type mode = "day" | "week" | "month";
 
@@ -37,9 +39,13 @@ const Schedule = () => {
   const [mode, setMode] = useState<mode>("day"); // day | week | month
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const { isPending, data } = useQuery({
-    queryKey: ["events"],
-    queryFn: ({ signal }) => getAllEventsData(signal, "", 1, 50),
+  useEffect(() => {
+    console.log(currentDate);
+  }, [currentDate]);
+
+  const { isPending, data: events } = useQuery({
+    queryKey: ["schedule", { currentDate, mode }],
+    queryFn: ({ signal }) => getScheduleEvents(signal, currentDate, mode),
   });
 
   const theme = useTheme();
@@ -73,6 +79,7 @@ const Schedule = () => {
     } else if (mode === "week") {
       const start = startOfWeek(currentDate);
       const end = endOfWeek(currentDate);
+      console.log(start, end);
       label = `${format(start, "MMM d")} – ${format(end, "MMM d")}`;
     } else {
       label = format(currentDate, "MMMM yyyy");
@@ -141,7 +148,7 @@ const Schedule = () => {
         </Box>
         {isPending && <LinearProgress></LinearProgress>}
         {renderBody(
-          (data?.events || []).map((event) => {
+          (events || []).map((event) => {
             return {
               ...event,
               start: new Date(event.start),
@@ -166,8 +173,8 @@ const DayView = ({
   const theme = useTheme();
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
-  const dayStart = new Date(date.setHours(0, 0, 0, 0));
-  const dayEnd = new Date(date.setHours(23, 59, 59, 999));
+  const dayStart = startOfDay(date);
+  const dayEnd = endOfDay(date);
 
   const dayEvents = events.filter((event) => {
     return event.end > dayStart && event.start < dayEnd;

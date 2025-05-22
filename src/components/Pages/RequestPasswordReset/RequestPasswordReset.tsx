@@ -3,7 +3,6 @@ import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
-import FormButton from "../../Form/FormButton";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
@@ -49,7 +48,7 @@ export default function RequestPasswordReset() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(data: any) => mutate(data)}
+        onSubmit={(data) => mutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -83,8 +82,9 @@ export default function RequestPasswordReset() {
               }}
             />
 
-            <FormButton loading={isPending}>Request password change</FormButton>
-
+            <Button loading={isPending} type="submit" variant="contained">
+              Request password change
+            </Button>
             <Typography
               textAlign="center"
               color="text.secondary"

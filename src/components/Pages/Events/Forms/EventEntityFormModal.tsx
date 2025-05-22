@@ -73,7 +73,6 @@ export default function EventEntityFormModal({
                 display: "flex",
                 flexDirection: "column",
                 maxHeight: "80vh",
-                bgcolor: theme.palette.background.default,
                 borderRadius: 2,
               }}
             >
@@ -82,7 +81,6 @@ export default function EventEntityFormModal({
                 sx={{
                   p: 2,
                   position: "relative",
-                  bgcolor: theme.palette.background.paper,
                   borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
               >
@@ -162,14 +160,9 @@ export default function EventEntityFormModal({
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  bgcolor: theme.palette.background.paper,
                 }}
               >
-                <Button
-                  disabled={mutationPending}
-                  onClick={onClose}
-                  variant="contained"
-                >
+                <Button disabled={mutationPending} onClick={onClose}>
                   Close
                 </Button>
                 <Button

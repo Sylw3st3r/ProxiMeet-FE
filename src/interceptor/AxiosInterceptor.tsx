@@ -1,8 +1,12 @@
-import { useContext, useEffect } from "react";
+import { ReactNode, useContext, useEffect } from "react";
 import { AuthContext } from "../authentication/auth-context";
 import axios from "axios";
 
-export default function AxiosInterceptor({ children }: any) {
+export default function AxiosInterceptor({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const { token } = useContext(AuthContext);
 
   useEffect(() => {
@@ -20,5 +24,5 @@ export default function AxiosInterceptor({ children }: any) {
     };
   }, [token]);
 
-  return children;
+  return <>{children}</>;
 }

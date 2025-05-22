@@ -39,7 +39,15 @@ export async function reverseGeocodeOSM(lat: number, lon: number) {
   }
 }
 
-export default function LocationPicker({ name, label, disabled = false }: any) {
+export default function LocationPicker({
+  name,
+  label,
+  disabled = false,
+}: {
+  name: string;
+  label: string;
+  disabled?: boolean;
+}) {
   const { location } = useContext(LocationContext);
   const [field, meta, helpers] = useField(name);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);

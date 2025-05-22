@@ -4,7 +4,6 @@ import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
-import FormButton from "../../Form/FormButton";
 import { AuthContext } from "../../../authentication/auth-context";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
@@ -70,7 +69,7 @@ export default function SignIn() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(data: any) => mutate(data)}
+        onSubmit={(data) => mutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -98,8 +97,9 @@ export default function SignIn() {
               <FormInput variant="standard" key={index} {...definition} />
             ))}
 
-            <FormButton loading={isPending}>Signin</FormButton>
-
+            <Button loading={isPending} type="submit" variant="contained">
+              Signin
+            </Button>
             <Typography
               textAlign="center"
               color="text.secondary"

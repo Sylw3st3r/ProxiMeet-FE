@@ -123,3 +123,17 @@ export async function addEvent(data: EventSubmitData): Promise<Event> {
 
   return response.data;
 }
+
+export async function getScheduleEvents(
+  signal: AbortSignal,
+  start: Date,
+  unit: "day" | "week" | "month",
+): Promise<Event[]> {
+  const response = await axios.get(
+    `${url}/schedule?start=${start.toISOString()}&unit=${unit}`,
+    {
+      signal,
+    },
+  );
+  return response.data.events;
+}

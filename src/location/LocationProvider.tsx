@@ -1,8 +1,12 @@
-import { useContext, useEffect, useState } from "react";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import { LocationContext } from "./location-context";
 import { AuthContext } from "../authentication/auth-context";
 
-export default function LocationProvider({ children }: any) {
+export default function LocationProvider({
+  children,
+}: {
+  children: ReactNode;
+}) {
   const [location, setLocation] = useState<null | {
     lat: number;
     lng: number;

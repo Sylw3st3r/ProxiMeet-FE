@@ -9,7 +9,13 @@ export const AuthContext = createContext<{
   token: null | string;
   refreshToken: null | string;
   refreshTokenExpirationDate: null | string;
-  logIn: (userData: any) => void;
+  logIn: (userData: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    token: string;
+    refreshToken: string;
+  }) => void;
   logOut: () => void;
 }>({
   dataLoading: false,
@@ -20,6 +26,6 @@ export const AuthContext = createContext<{
   token: null,
   refreshToken: null,
   refreshTokenExpirationDate: null,
-  logIn: (userData) => {},
+  logIn: () => {},
   logOut: () => {},
 });

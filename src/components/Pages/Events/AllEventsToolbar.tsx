@@ -7,17 +7,27 @@ import {
   Toolbar,
   useTheme,
 } from "@mui/material";
+import { ReactNode } from "react";
 
 export default function AllEventsToolbar({
   search,
   setSearch,
   page,
   setPage,
-  totalPages,
+  totalPages = 1,
   limit,
   setLimit,
   children,
-}: any) {
+}: {
+  search: string;
+  setSearch: (value: string) => void;
+  page: number;
+  setPage: (value: number) => void;
+  totalPages?: number;
+  limit: number;
+  setLimit: (value: number) => void;
+  children?: ReactNode;
+}) {
   const theme = useTheme();
 
   return (

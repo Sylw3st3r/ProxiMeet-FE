@@ -7,7 +7,7 @@ import {
   Typography,
   CardActions,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import ImageIcon from "@mui/icons-material/Image";
 
 export default function EventCard({
@@ -15,7 +15,7 @@ export default function EventCard({
   children,
 }: {
   event: { id: number; name: string; description: string; image: string };
-  children?: any;
+  children?: ReactNode;
 }) {
   const [loaded, setLoaded] = useState(false);
 

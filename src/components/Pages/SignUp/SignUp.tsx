@@ -1,14 +1,13 @@
-import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
-import FormButton from "../../Form/FormButton";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { signup } from "../../../vendor/auth-vendor";
+import { AxiosError } from "axios";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
@@ -73,7 +72,7 @@ export default function SignUp() {
     onSuccess: () => {
       handleClick();
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ errorDescription: string }>) => {
       enqueueSnackbar(
         error.response?.data?.errorDescription ||
           "Something went wrong! Try again later",
@@ -99,7 +98,7 @@ export default function SignUp() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(data: any) => mutate(data)}
+        onSubmit={(data) => mutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -127,7 +126,9 @@ export default function SignUp() {
               <FormInput variant="standard" key={index} {...definition} />
             ))}
 
-            <FormButton loading={isPending}>signup</FormButton>
+            <Button loading={isPending} type="submit" variant="contained">
+              signup
+            </Button>
 
             <Typography
               textAlign="center"

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, ReactNode } from "react";
 import { AuthContext } from "./auth-context";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -15,7 +15,7 @@ export const defaultAuthenticationContext = {
   isLoggedIn: false,
 };
 
-export default function AuthProvider({ children }: any) {
+export default function AuthProvider({ children }: { children: ReactNode }) {
   const [
     {
       firstName,

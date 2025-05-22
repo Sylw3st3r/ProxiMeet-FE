@@ -38,7 +38,7 @@ export default function AllEvents() {
       // Wait for confirmation
       const userConfirmed = await confirm({
         title: "Overlap detected. Do you want to proceed anyway?",
-        message: `Detected overlap with: ${overlapingEvents.map((event: any) => event.name).join(", ")}`,
+        message: `Detected overlap with: ${overlapingEvents.map((event) => event.name).join(", ")}`,
       });
       if (!userConfirmed) {
         return;

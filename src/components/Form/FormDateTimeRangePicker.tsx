@@ -1,31 +1,38 @@
-import React from "react";
 import { useFormikContext, useField } from "formik";
 import { useTranslation } from "react-i18next";
 import { Grid } from "@mui/material";
-import { LocalizationProvider, DateTimePicker } from "@mui/x-date-pickers";
+import {
+  LocalizationProvider,
+  DateTimePicker,
+  DateTimePickerProps,
+} from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
-interface Props {
-  name: string;
-  labelStart?: string;
-  labelEnd?: string;
-  disabled?: boolean;
-  [key: string]: any;
-}
+type DateTimePickerChangeValue = DateTimePickerProps["value"];
 
 export default function FormDateTimeRange({
   name,
   labelStart = "Start Date",
   labelEnd = "End Date",
   disabled,
-}: Props) {
+}: {
+  name: string;
+  label: string;
+  placeholder: string;
+  labelStart?: string;
+  labelEnd?: string;
+  disabled?: boolean;
+}) {
   const { t } = useTranslation();
-  const { setFieldValue } = useFormikContext<any>();
+  const { setFieldValue } = useFormikContext();
 
   const [startField, startMeta] = useField(`${name}.start`);
   const [endField, endMeta] = useField(`${name}.end`);
 
-  const handleChange = (fieldName: string, value: any) => {
+  const handleChange = (
+    fieldName: string,
+    value: DateTimePickerChangeValue,
+  ) => {
     setFieldValue(fieldName, value);
   };
   return (
