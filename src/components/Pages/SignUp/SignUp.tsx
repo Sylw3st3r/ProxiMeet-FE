@@ -5,10 +5,10 @@ import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import axios, { AxiosError } from "axios";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
+import { signup } from "../../../vendor/auth-vendor";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
@@ -63,17 +63,13 @@ const INITIAL_VALUES = {
   matchingPassword: "",
 };
 
-const handleSubmit = async (data: any) => {
-  return await axios.put("http://localhost:3001/users/signup", data);
-};
-
 export default function SignUp() {
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: handleSubmit,
+    mutationFn: signup,
     onSuccess: () => {
       handleClick();
     },

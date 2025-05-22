@@ -1,11 +1,18 @@
-import React from "react";
 import { Formik, Form } from "formik";
-import { Box, Dialog, useTheme, Typography, Button } from "@mui/material";
+import {
+  Box,
+  Dialog,
+  useTheme,
+  Typography,
+  Button,
+  LinearProgress,
+} from "@mui/material";
 import ImageUpload from "../../../Form/ImageUpload";
 import FormInput from "../../../Form/Input";
 import * as Yup from "yup";
 import LocationPicker from "../../../Form/FormLocationPicker";
 import FormDateTimeRangePicker from "../../../Form/FormDateTimeRangePicker";
+import { EventSubmitData } from "../../../../model/event";
 
 export type EventEntityFields =
   | "name"
@@ -15,7 +22,7 @@ export type EventEntityFields =
   | "dateTimeRange";
 
 type EventEntityModalProps = {
-  handleSubmit: (data: eventSubmitData) => void;
+  handleSubmit: (data: EventSubmitData) => void;
   INITIAL_VALUES: Record<
     EventEntityFields,
     | string
@@ -26,31 +33,18 @@ type EventEntityModalProps = {
   >;
   VALIDATOR: Yup.ObjectSchema<Record<EventEntityFields, any>>;
   onClose: () => void;
-  loading: boolean;
+  loadingData?: boolean;
+  mutationPending: boolean;
   headerText: string;
   submitButtonText: string;
-};
-
-export type eventSubmitData = {
-  id?: string;
-  name: string;
-  description: string;
-  image: string | Blob;
-  location: {
-    lat: number;
-    lng: number;
-  };
-  dateTimeRange: {
-    start: Date;
-    end: Date;
-  };
 };
 
 export default function EventEntityFormModal({
   handleSubmit,
   INITIAL_VALUES,
   VALIDATOR,
-  loading,
+  loadingData,
+  mutationPending,
   onClose,
   headerText,
   submitButtonText,
@@ -58,10 +52,16 @@ export default function EventEntityFormModal({
   const theme = useTheme();
 
   return (
-    <Dialog onClose={onClose} open={true} maxWidth="sm" fullWidth>
+    <Dialog
+      onClose={mutationPending ? undefined : onClose}
+      open={true}
+      maxWidth="sm"
+      fullWidth
+    >
       <Formik
+        enableReinitialize={true}
         initialValues={{
-          ...(INITIAL_VALUES as eventSubmitData),
+          ...(INITIAL_VALUES as EventSubmitData),
         }}
         onSubmit={handleSubmit}
         validationSchema={VALIDATOR}
@@ -81,11 +81,17 @@ export default function EventEntityFormModal({
               <Box
                 sx={{
                   p: 2,
+                  position: "relative",
                   bgcolor: theme.palette.background.paper,
                   borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
               >
                 <Typography variant="h6">{headerText}</Typography>
+                {(loadingData || mutationPending) && (
+                  <LinearProgress
+                    sx={{ position: "absolute", bottom: 0, left: 0, right: 0 }}
+                  />
+                )}
               </Box>
 
               {/* Scrollable Content */}
@@ -102,6 +108,7 @@ export default function EventEntityFormModal({
                 <FormInput
                   variant="standard"
                   {...{
+                    disabled: loadingData,
                     name: "name",
                     label: "name.label",
                     placeholder: "name.placeholder",
@@ -111,6 +118,8 @@ export default function EventEntityFormModal({
                 <FormInput
                   variant="standard"
                   {...{
+                    disabled: loadingData,
+                    multiline: true,
                     name: "description",
                     label: "description.label",
                     placeholder: "description.placeholder",
@@ -119,6 +128,7 @@ export default function EventEntityFormModal({
 
                 <FormDateTimeRangePicker
                   {...{
+                    disabled: loadingData,
                     name: "dateTimeRange",
                     label: "dateTimeRange.label",
                     placeholder: "dateTimeRange.placeholder",
@@ -127,6 +137,7 @@ export default function EventEntityFormModal({
 
                 <ImageUpload
                   {...{
+                    disabled: loadingData,
                     name: "image",
                     label: "image.label",
                     placeholder: "image.placeholder",
@@ -135,6 +146,7 @@ export default function EventEntityFormModal({
 
                 <LocationPicker
                   {...{
+                    disabled: loadingData,
                     name: "location",
                     label: "location.label",
                     placeholder: "location.placeholder",
@@ -153,10 +165,19 @@ export default function EventEntityFormModal({
                   bgcolor: theme.palette.background.paper,
                 }}
               >
-                <Button onClick={onClose} variant="contained">
+                <Button
+                  disabled={mutationPending}
+                  onClick={onClose}
+                  variant="contained"
+                >
                   Close
                 </Button>
-                <Button loading={loading} type="submit" variant="contained">
+                <Button
+                  disabled={loadingData}
+                  loading={mutationPending}
+                  type="submit"
+                  variant="contained"
+                >
                   {submitButtonText}
                 </Button>
               </Box>

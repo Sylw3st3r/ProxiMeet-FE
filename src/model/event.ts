@@ -29,3 +29,18 @@ export interface PaginatedEvents {
 export interface PaginatedEventsWithAttendance extends PaginatedEvents {
   events: EventWithAttendance[];
 }
+
+export interface EventSubmitData {
+  id?: string;
+  name: string;
+  description: string;
+  image: string | Blob;
+  location: {
+    lat: number;
+    lng: number;
+  };
+  dateTimeRange: {
+    start: Date;
+    end: Date;
+  };
+}

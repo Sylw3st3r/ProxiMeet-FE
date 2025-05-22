@@ -1,5 +1,4 @@
-import React from "react";
-import { Typography, Paper, Box, Button, useTheme } from "@mui/material";
+import { Typography, Paper, Box, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 

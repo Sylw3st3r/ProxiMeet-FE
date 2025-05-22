@@ -1,13 +1,12 @@
-import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import axios from "axios";
 import { useNavigate, useParams } from "react-router";
 import { useMutation } from "@tanstack/react-query";
+import { resetPassword } from "../../../vendor/auth-vendor";
 
 const VALIDATOR = Yup.object({
   token: Yup.string().required("token.required"),
@@ -19,14 +18,6 @@ const VALIDATOR = Yup.object({
     }),
 });
 
-const handleSubmit = async (data: {
-  token: string;
-  password: string;
-  matchingPassword: string;
-}) => {
-  return await axios.post("http://localhost:3001/users/password-reset", data);
-};
-
 export default function PasswordReset() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -35,7 +26,7 @@ export default function PasswordReset() {
   let params = useParams();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: handleSubmit,
+    mutationFn: resetPassword,
     onSuccess: () => {
       handleClick();
     },

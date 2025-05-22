@@ -23,9 +23,9 @@ import {
 import { Icon } from "leaflet";
 
 import marker from "../../../assets/red-pin.png";
-import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { LocationContext } from "../../../location/location-context";
+import { getEventsNearLocation } from "../../../vendor/events-vendor";
 const myIcon = new Icon({
   iconUrl: marker,
   iconRetinaUrl: marker,
@@ -65,17 +65,6 @@ export function CustomPopup({ name, image, description }) {
 const KM_TO_M = 1000;
 const MILES_TO_M = 1609.34;
 
-const getData = async (signal, lat, lng, radius, unit) => {
-  const response = await axios.get(
-    `http://localhost:3001/events/near?lat=${lat}&lng=${lng}&radius=${radius}&unit=${unit}`,
-    {
-      signal,
-    },
-  );
-
-  return response.data.events;
-};
-
 export default function NearYou() {
   const { location } = useContext(LocationContext);
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -87,7 +76,13 @@ export default function NearYou() {
   const { data } = useQuery({
     queryKey: ["near-events", { radius, unit, pickedLocation }],
     queryFn: ({ signal }) =>
-      getData(signal, pickedLocation.lat, pickedLocation.lng, radius, unit),
+      getEventsNearLocation(
+        signal,
+        pickedLocation.lat,
+        pickedLocation.lng,
+        radius,
+        unit,
+      ),
   });
 
   // Component that shows a marker in selected location

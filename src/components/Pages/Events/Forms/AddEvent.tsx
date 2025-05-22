@@ -1,12 +1,10 @@
-import React from "react";
 import * as Yup from "yup";
-import { eventSubmitData } from "./EventEntityFormModal";
-import axios from "axios";
 import { useNavigate } from "react-router";
 import { useSnackbar } from "notistack";
 import { useMutation } from "@tanstack/react-query";
 import { client } from "../../../..";
 import EventEntityFormModal from "./EventEntityFormModal";
+import { addEvent } from "../../../../vendor/events-vendor";
 
 const coordinatesSchema = Yup.object({
   lat: Yup.number()
@@ -56,28 +54,15 @@ const INITIAL_VALUES = {
   },
 };
 
-const handleSubmit = async (data: eventSubmitData) => {
-  // Prepere data
-  const requestData = new FormData();
-  requestData.append("name", data.name);
-  requestData.append("description", data.description);
-  requestData.append("image", data.image);
-  requestData.append("lat", `${data.location.lat}`);
-  requestData.append("lng", `${data.location.lng}`);
-  requestData.append("start", `${data.dateTimeRange.start.toISOString()}`);
-  requestData.append("end", `${data.dateTimeRange.end.toISOString()}`);
-
-  return await axios.put(`http://localhost:3001/events/add`, requestData);
-};
-
 export default function AddEventModal() {
   const navigate = useNavigate();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: handleSubmit,
+    mutationFn: addEvent,
     onSuccess: async () => {
       client.invalidateQueries({ queryKey: ["user-events"] });
       client.invalidateQueries({ queryKey: ["events"] });
+      onClose();
       enqueueSnackbar("Event was added successfuly!", { variant: "success" });
     },
     onError: () => {
@@ -98,7 +83,7 @@ export default function AddEventModal() {
       INITIAL_VALUES={{ ...INITIAL_VALUES }}
       VALIDATOR={VALIDATOR}
       onClose={onClose}
-      loading={isPending}
+      mutationPending={isPending}
       headerText="Add event"
       submitButtonText="Add"
     />

@@ -1,14 +1,13 @@
-import React from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import axios from "axios";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
+import { requestPasswordResetToken } from "../../../vendor/auth-vendor";
 
 const VALIDATOR = Yup.object({
   email: Yup.string().required("email.required").email("email.invalid"),
@@ -18,10 +17,6 @@ const INITIAL_VALUES = {
   email: "",
 };
 
-const handleSubmit = async (data: { email: string }) => {
-  return axios.post("http://localhost:3001/users/request-password-reset", data);
-};
-
 export default function RequestPasswordReset() {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -29,7 +24,7 @@ export default function RequestPasswordReset() {
   const { enqueueSnackbar } = useSnackbar();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: handleSubmit,
+    mutationFn: requestPasswordResetToken,
     onSuccess: () => {
       enqueueSnackbar("Check your inbox for password reset", {
         variant: "success",

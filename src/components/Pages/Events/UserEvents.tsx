@@ -1,7 +1,16 @@
-import React, { useState } from "react";
-import { Box, Button, LinearProgress, Grid, ButtonGroup } from "@mui/material";
+import { useState } from "react";
+import {
+  Box,
+  Button,
+  LinearProgress,
+  Grid,
+  ButtonGroup,
+  IconButton,
+  Tooltip,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
 import { Outlet, useNavigate } from "react-router";
-import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import AllEventsToolbar from "./AllEventsToolbar";
 import { client } from "../../..";
@@ -12,6 +21,7 @@ import {
 } from "../../../vendor/events-vendor";
 import { useConfirm } from "../../../hooks/useConfirm";
 import { Event } from "../../../model/event";
+import { Add } from "@mui/icons-material";
 
 const UserEvents = () => {
   const [page, setPage] = useState(1);
@@ -65,6 +75,7 @@ const UserEvents = () => {
         }}
       >
         <Button
+          startIcon={<Add />}
           disabled={deletionPending}
           variant={"contained"}
           onClick={() => {
@@ -83,24 +94,26 @@ const UserEvents = () => {
             <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
               <EventCard key={event.id} event={event}>
                 <ButtonGroup>
-                  <Button
-                    disabled={deletionPending}
-                    onClick={() => {
-                      navigate(`edit/${event.id}`);
-                    }}
-                    size="small"
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    loading={deletionPending}
-                    onClick={() => {
-                      deleteEventMutation(event);
-                    }}
-                    size="small"
-                  >
-                    Delete
-                  </Button>
+                  <Tooltip title="Edit">
+                    <IconButton
+                      disabled={deletionPending}
+                      onClick={() => {
+                        navigate(`edit/${event.id}`);
+                      }}
+                    >
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Delete">
+                    <IconButton
+                      loading={deletionPending}
+                      onClick={() => {
+                        deleteEventMutation(event);
+                      }}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  </Tooltip>
                 </ButtonGroup>
               </EventCard>
             </Grid>

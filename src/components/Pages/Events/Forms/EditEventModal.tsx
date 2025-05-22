@@ -1,12 +1,11 @@
 import { useNavigate, useParams } from "react-router";
 import * as Yup from "yup";
-import axios from "axios";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { client } from "../../../..";
-import EventEntityFormModal, { eventSubmitData } from "./EventEntityFormModal";
-import { getEvent } from "../../../../vendor/events-vendor";
-import { LinearProgress } from "@mui/material";
+import EventEntityFormModal from "./EventEntityFormModal";
+import { editEvent, getEvent } from "../../../../vendor/events-vendor";
+import { Event } from "../../../../model/event";
 
 const coordinatesSchema = Yup.object({
   lat: Yup.number()
@@ -46,39 +45,52 @@ const VALIDATOR = Yup.object({
   }).required("Date range is required"),
 });
 
-const handleSubmit = async (data: eventSubmitData) => {
-  // Prepere data
-  const requestData = new FormData();
-  requestData.append("name", data.name);
-  requestData.append("description", data.description);
-  requestData.append("image", data.image);
-  requestData.append("lat", `${data.location.lat}`);
-  requestData.append("lng", `${data.location.lng}`);
-  requestData.append("start", `${data.dateTimeRange.start.toISOString()}`);
-  requestData.append("end", `${data.dateTimeRange.end.toISOString()}`);
-
-  return await axios.patch(
-    `http://localhost:3001/events/edit/${data.id}`,
-    requestData,
-  );
-};
+function transformEventDataToForm(event?: Event) {
+  if (event) {
+    return {
+      id: event.id,
+      name: event.name,
+      description: event.description,
+      image: event.image,
+      location: {
+        lat: event.lat,
+        lng: event.lng,
+      },
+      dateTimeRange: {
+        start: new Date(event.start),
+        end: new Date(event.end),
+      },
+    };
+  }
+  return {
+    name: "",
+    description: "",
+    image: null,
+    location: null,
+    dateTimeRange: {
+      start: null,
+      end: null,
+    },
+  };
+}
 
 export default function EditEventModal() {
   let { id } = useParams();
 
   const validId = !(!id || isNaN(Number(id)) || Number(id) < 1);
 
-  const { data: eventData, isPending: eventPending } = useQuery({
+  const { data: eventData, isPending: eventDataPending } = useQuery({
     queryKey: ["events", { id }],
     queryFn: ({ signal }) => getEvent(signal, Number(id)),
     enabled: validId,
   });
 
-  const { mutate, isPending } = useMutation({
-    mutationFn: handleSubmit,
+  const { mutate, isPending: editPending } = useMutation({
+    mutationFn: editEvent,
     onSuccess: async () => {
       client.invalidateQueries({ queryKey: ["user-events"] });
       client.invalidateQueries({ queryKey: ["events"] });
+      onClose();
       enqueueSnackbar("Event eddited successfuly!", { variant: "success" });
     },
     onError: () => {
@@ -92,38 +104,16 @@ export default function EditEventModal() {
     navigate("/dashboard/user-events");
   };
 
-  if (eventPending) {
-    return <LinearProgress></LinearProgress>;
-  }
-
-  if (!eventData) {
-    return <></>;
-  }
-
-  const INITIAL_VALUES = {
-    id: eventData.id,
-    name: eventData.name,
-    description: eventData.description,
-    image: eventData.image,
-    location: {
-      lat: eventData.lat,
-      lng: eventData.lng,
-    },
-    dateTimeRange: {
-      start: new Date(eventData.start),
-      end: new Date(eventData.end),
-    },
-  };
-
   return (
     <EventEntityFormModal
       handleSubmit={(data) => {
         mutate(data);
       }}
-      INITIAL_VALUES={{ ...INITIAL_VALUES }}
+      INITIAL_VALUES={{ ...transformEventDataToForm(eventData) }}
       VALIDATOR={VALIDATOR}
       onClose={onClose}
-      loading={isPending}
+      mutationPending={editPending}
+      loadingData={eventDataPending}
       headerText="Edit event"
       submitButtonText="Edit"
     />

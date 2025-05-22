@@ -1,16 +1,15 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import FormInput from "../../Form/Input";
 import FormButton from "../../Form/FormButton";
-import axios from "axios";
 import { AuthContext } from "../../../authentication/auth-context";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
-import { client } from "../../..";
 import { useSnackbar } from "notistack";
+import { signin } from "../../../vendor/auth-vendor";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
@@ -37,19 +36,15 @@ const INITIAL_VALUES = {
   password: "",
 };
 
-const handleSubmit = async (data: any) => {
-  return await axios.post("http://localhost:3001/users/signin", data);
-};
-
 export default function SignIn() {
   const { logIn } = useContext(AuthContext);
   const { t } = useTranslation();
   const theme = useTheme();
 
   const { mutate, isPending } = useMutation({
-    mutationFn: handleSubmit,
-    onSuccess: (response) => {
-      logIn(response.data);
+    mutationFn: signin,
+    onSuccess: (userData) => {
+      logIn(userData);
     },
     onError: () => {
       enqueueSnackbar("Couldn't add event!", { variant: "error" });

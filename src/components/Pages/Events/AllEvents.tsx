@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { Grid, Box, LinearProgress, Button, ButtonGroup } from "@mui/material";
+import {
+  Grid,
+  Box,
+  LinearProgress,
+  ButtonGroup,
+  Tooltip,
+  IconButton,
+} from "@mui/material";
 import { Outlet } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import EventCard from "./EventCard";
 import AllEventsToolbar from "./AllEventsToolbar";
 import { useConfirm } from "../../../hooks/useConfirm";
+import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
+import HowToRegIcon from "@mui/icons-material/HowToReg";
 import {
   checkEventOverlapHandler,
   attendEvent,
@@ -87,25 +96,27 @@ export default function AllEvents() {
               <EventCard key={event.id} event={event}>
                 <ButtonGroup>
                   {event.attending ? (
-                    <Button
-                      disabled={resignFromAttendEventMutationPending}
-                      onClick={() => {
-                        resignFromAttendEventMutation(event.id);
-                      }}
-                      size="small"
-                    >
-                      Resign
-                    </Button>
+                    <Tooltip title="Resign">
+                      <IconButton
+                        disabled={resignFromAttendEventMutationPending}
+                        onClick={() => {
+                          resignFromAttendEventMutation(event.id);
+                        }}
+                      >
+                        <PersonRemoveIcon />
+                      </IconButton>
+                    </Tooltip>
                   ) : (
-                    <Button
-                      disabled={attendEventMutationPending}
-                      onClick={() => {
-                        attendEventMutation(event.id);
-                      }}
-                      size="small"
-                    >
-                      Attend
-                    </Button>
+                    <Tooltip title="Attend">
+                      <IconButton
+                        disabled={attendEventMutationPending}
+                        onClick={() => {
+                          attendEventMutation(event.id);
+                        }}
+                      >
+                        <HowToRegIcon />
+                      </IconButton>
+                    </Tooltip>
                   )}
                 </ButtonGroup>
               </EventCard>

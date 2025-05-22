@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Box,
   ToggleButton,
@@ -30,7 +30,6 @@ import {
 } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { getAllEventsData } from "../../../vendor/events-vendor";
-import { Event } from "../../../model/event";
 
 type mode = "day" | "week" | "month";
 

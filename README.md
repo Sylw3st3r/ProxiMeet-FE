@@ -39,4 +39,3 @@ This is work in progress. Many of the styles are subjected to possible change. M
 - Design improvements
 - User personal data change
 - More flters and sorting options
-

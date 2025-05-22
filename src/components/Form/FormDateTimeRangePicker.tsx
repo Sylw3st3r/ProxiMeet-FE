@@ -9,6 +9,7 @@ interface Props {
   name: string;
   labelStart?: string;
   labelEnd?: string;
+  disabled?: boolean;
   [key: string]: any;
 }
 
@@ -16,6 +17,7 @@ export default function FormDateTimeRange({
   name,
   labelStart = "Start Date",
   labelEnd = "End Date",
+  disabled,
 }: Props) {
   const { t } = useTranslation();
   const { setFieldValue } = useFormikContext<any>();
@@ -32,6 +34,7 @@ export default function FormDateTimeRange({
         <DateTimePicker
           label={t(labelStart)}
           value={startField.value}
+          disabled={disabled}
           onChange={(val) => handleChange(`${name}.start`, val)}
           ampm={false}
           slotProps={{
@@ -47,6 +50,7 @@ export default function FormDateTimeRange({
         <DateTimePicker
           label={t(labelEnd)}
           value={endField.value}
+          disabled={disabled}
           onChange={(val) => handleChange(`${name}.end`, val)}
           ampm={false}
           slotProps={{

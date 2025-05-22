@@ -10,7 +10,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { useField } from "formik";
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
 
@@ -39,7 +39,7 @@ export async function reverseGeocodeOSM(lat: number, lon: number) {
   }
 }
 
-export default function LocationPicker({ name, label }: any) {
+export default function LocationPicker({ name, label, disabled = false }: any) {
   const { location } = useContext(LocationContext);
   const [field, meta, helpers] = useField(name);
   const [mapDialogOpen, setMapDialogOpen] = useState(false);
@@ -57,17 +57,19 @@ export default function LocationPicker({ name, label }: any) {
     helpers.setTouched(false);
     setAddress(addr);
     setMapDialogOpen(false);
-  }, [pickedLocation]);
+  }, [pickedLocation, helpers, setAddress, setMapDialogOpen]);
 
   useEffect(() => {
     handleSaveOfPickedLocation();
-  }, []);
+  }, [handleSaveOfPickedLocation]);
 
   // Component that shows a marker in selected location
   const LocationMarker = () => {
     useMapEvents({
       click(e) {
-        setPickedLocation(e.latlng as any);
+        if (!disabled) {
+          setPickedLocation(e.latlng as any);
+        }
       },
     });
 
@@ -90,21 +92,20 @@ export default function LocationPicker({ name, label }: any) {
         )}
 
         <Box
-          onClick={() => setMapDialogOpen(true)}
+          onClick={() => !disabled && setMapDialogOpen(true)}
           sx={{
             position: "relative",
             pt: label ? 2.5 : 0,
             pb: 0.5,
             borderBottom: 1,
             borderColor: showError ? "error.main" : "text.primary",
-            cursor: "pointer",
-            "&:hover": {
-              backgroundColor: "action.hover",
-            },
+            cursor: disabled ? "not-allowed" : "pointer",
+            pointerEvents: disabled ? "none" : "auto",
           }}
         >
           <input
             id={`location-picker-${name}`}
+            disabled={disabled}
             style={{
               position: "absolute",
               top: 0,
@@ -112,13 +113,17 @@ export default function LocationPicker({ name, label }: any) {
               width: "100%",
               height: "100%",
               opacity: 0,
-              cursor: "pointer",
+              cursor: disabled ? "not-allowed" : "pointer",
             }}
           />
           <Typography
             variant="body1"
             sx={{
-              color: showError ? "error.main" : "text.primary",
+              color: disabled
+                ? "text.disabled"
+                : showError
+                  ? "error.main"
+                  : "text.primary",
               px: 0,
             }}
           >
@@ -158,14 +163,12 @@ export default function LocationPicker({ name, label }: any) {
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
               />
-              <LocationMarker></LocationMarker>
+              <LocationMarker />
             </MapContainer>
           </Box>
           <Box
             p={2}
-            sx={{
-              borderTop: `1px solid ${theme.palette.divider}`,
-            }}
+            sx={{ borderTop: `1px solid ${theme.palette.divider}` }}
             display="flex"
             justifyContent="flex-end"
             gap={1}
@@ -173,7 +176,11 @@ export default function LocationPicker({ name, label }: any) {
             <Button onClick={() => setMapDialogOpen(false)}>
               {t("Cancel")}
             </Button>
-            <Button onClick={handleSaveOfPickedLocation} variant="contained">
+            <Button
+              onClick={handleSaveOfPickedLocation}
+              variant="contained"
+              disabled={disabled}
+            >
               {t("Save location")}
             </Button>
           </Box>
