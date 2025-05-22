@@ -8,11 +8,12 @@ import {
   LinearProgress,
 } from "@mui/material";
 import ImageUpload from "../../../Form/ImageUpload";
-import FormInput from "../../../Form/Input";
+import FormInput from "../../../Form/FormInput";
 import * as Yup from "yup";
 import LocationPicker from "../../../Form/FormLocationPicker";
 import FormDateTimeRangePicker from "../../../Form/FormDateTimeRangePicker";
 import { EventSubmitData } from "../../../../model/event";
+import { useTranslation } from "react-i18next";
 
 export type EventEntityFields =
   | "name"
@@ -50,6 +51,7 @@ export default function EventEntityFormModal({
   submitButtonText,
 }: EventEntityModalProps) {
   const theme = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Dialog
@@ -84,7 +86,7 @@ export default function EventEntityFormModal({
                   borderBottom: `1px solid ${theme.palette.divider}`,
                 }}
               >
-                <Typography variant="h6">{headerText}</Typography>
+                <Typography variant="h6">{t(headerText)}</Typography>
                 {(loadingData || mutationPending) && (
                   <LinearProgress
                     sx={{ position: "absolute", bottom: 0, left: 0, right: 0 }}
@@ -108,8 +110,8 @@ export default function EventEntityFormModal({
                   {...{
                     disabled: loadingData,
                     name: "name",
-                    label: "name.label",
-                    placeholder: "name.placeholder",
+                    label: "event.form.name.label",
+                    placeholder: "event.form.name.placeholder",
                   }}
                 />
 
@@ -119,17 +121,19 @@ export default function EventEntityFormModal({
                     disabled: loadingData,
                     multiline: true,
                     name: "description",
-                    label: "description.label",
-                    placeholder: "description.placeholder",
+                    label: "event.form.description.label",
+                    placeholder: "event.form.description.placeholder",
                   }}
                 />
 
                 <FormDateTimeRangePicker
                   {...{
                     disabled: loadingData,
+                    labelStart: "event.form.dateTimeRange.start.label",
+                    labelEnd: "event.form.dateTimeRange.end.label",
                     name: "dateTimeRange",
-                    label: "dateTimeRange.label",
-                    placeholder: "dateTimeRange.placeholder",
+                    label: "event.form.dateTimeRange.label",
+                    placeholder: "event.form.dateTimeRange.placeholder",
                   }}
                 />
 
@@ -137,8 +141,8 @@ export default function EventEntityFormModal({
                   {...{
                     disabled: loadingData,
                     name: "image",
-                    label: "image.label",
-                    placeholder: "image.placeholder",
+                    label: "event.form.image.label",
+                    placeholder: "event.form.image.placeholder",
                   }}
                 />
 
@@ -146,8 +150,8 @@ export default function EventEntityFormModal({
                   {...{
                     disabled: loadingData,
                     name: "location",
-                    label: "location.label",
-                    placeholder: "location.placeholder",
+                    label: "event.form.location.label",
+                    placeholder: "event.form.location.placeholder",
                   }}
                 />
               </Box>
@@ -163,7 +167,7 @@ export default function EventEntityFormModal({
                 }}
               >
                 <Button disabled={mutationPending} onClick={onClose}>
-                  Close
+                  {t("common.close")}
                 </Button>
                 <Button
                   disabled={loadingData}
@@ -171,7 +175,7 @@ export default function EventEntityFormModal({
                   type="submit"
                   variant="contained"
                 >
-                  {submitButtonText}
+                  {t(submitButtonText)}
                 </Button>
               </Box>
             </Box>

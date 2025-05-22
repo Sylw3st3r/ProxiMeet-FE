@@ -1,15 +1,14 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { Navigate, Outlet } from "react-router";
 import { AuthContext } from "../../../authentication/auth-context";
-import { Box, useColorScheme } from "@mui/material";
+import { Box } from "@mui/material";
 import { useLottie } from "lottie-react";
 import animation from "../../../assets/animation.json";
-
-import { Switch } from "@mui/material";
+import { LanguageMenu } from "../../Settings/LanguageMenu";
+import ThemeSwitch from "../../Settings/ThemeSwitch";
 
 export default function UnauthorizedLayout() {
   const { isLoggedIn } = useContext(AuthContext);
-  const { mode, setMode } = useColorScheme();
   const { View } = useLottie({
     loop: true,
     animationData: animation,
@@ -42,6 +41,10 @@ export default function UnauthorizedLayout() {
           {View}
         </Box>
       </Box>
+      <Box sx={{ position: "absolute", top: 4, right: 4 }}>
+        <LanguageMenu />
+        <ThemeSwitch />
+      </Box>
       <Box
         sx={{
           height: "100vh",
@@ -49,13 +52,6 @@ export default function UnauthorizedLayout() {
           backgroundColor: "background.default",
         }}
       >
-        <Switch
-          sx={{ position: "absolute", right: 4, top: 4 }}
-          value={mode === "light" ? "dark" : "light"}
-          onClick={() => {
-            setMode(mode === "light" ? "dark" : "light");
-          }}
-        />
         <Outlet />
       </Box>
     </Box>

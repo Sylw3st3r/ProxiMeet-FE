@@ -3,31 +3,30 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import FormInput from "../../Form/Input";
+import FormInput from "../../Form/FormInput";
 import { AuthContext } from "../../../authentication/auth-context";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useSnackbar } from "notistack";
 import { signin } from "../../../vendor/auth-vendor";
 
 const INPUT_FIELDS_DEFINITIONS = [
   {
     name: "email",
-    label: "email.label",
-    placeholder: "email.placeholder",
+    label: "auth.form.email.label",
+    placeholder: "auth.form.email.placeholder",
     type: "email",
   },
   {
     name: "password",
-    label: "password.label",
-    placeholder: "password.required",
+    label: "auth.form.password.label",
+    placeholder: "auth.form.password.required",
     type: "password",
   },
 ];
 
 const VALIDATOR = Yup.object({
-  email: Yup.string().required("email.required"),
-  password: Yup.string().required("password.required"),
+  email: Yup.string().required("auth.form.email.required"),
+  password: Yup.string().required("auth.form.password.required"),
 });
 
 const INITIAL_VALUES = {
@@ -45,11 +44,7 @@ export default function SignIn() {
     onSuccess: (userData) => {
       logIn(userData);
     },
-    onError: () => {
-      enqueueSnackbar("Couldn't add event!", { variant: "error" });
-    },
   });
-  const { enqueueSnackbar } = useSnackbar();
 
   const navigate = useNavigate();
 
@@ -98,14 +93,14 @@ export default function SignIn() {
             ))}
 
             <Button loading={isPending} type="submit" variant="contained">
-              Signin
+              {t("auth.signin")}
             </Button>
             <Typography
               textAlign="center"
               color="text.secondary"
               sx={{ my: 2 }}
             >
-              {t("or")}
+              {t("common.or")}
             </Typography>
 
             <Button
@@ -113,7 +108,7 @@ export default function SignIn() {
               onClick={handleClick}
               variant="outlined"
             >
-              {t("signup")}
+              {t("auth.signup")}
             </Button>
           </Box>
         </Form>

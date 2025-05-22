@@ -2,19 +2,23 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import FormInput from "../../Form/Input";
+import FormInput from "../../Form/FormInput";
 import { useNavigate, useParams } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { resetPassword } from "../../../vendor/auth-vendor";
 
 const VALIDATOR = Yup.object({
-  token: Yup.string().required("token.required"),
-  password: Yup.string().required("password.required"),
+  token: Yup.string().required("auth.form.token.required"),
+  password: Yup.string().required("auth.form.password.required"),
   matchingPassword: Yup.string()
-    .required("password.required")
-    .test("passwords-match", "matchingPassword.match", function (value) {
-      return this.parent.password === value;
-    }),
+    .required("auth.form.password.required")
+    .test(
+      "passwords-match",
+      "auth.form.matchingPassword.mustMatch",
+      function (value) {
+        return this.parent.password === value;
+      },
+    ),
 });
 
 export default function PasswordReset() {
@@ -83,8 +87,8 @@ export default function PasswordReset() {
               variant="standard"
               {...{
                 name: "password",
-                label: "password.label",
-                placeholder: "password.required",
+                label: "auth.form.password.label",
+                placeholder: "auth.form.password.placeholder",
                 type: "password",
               }}
             />
@@ -93,14 +97,14 @@ export default function PasswordReset() {
               variant="standard"
               {...{
                 name: "matchingPassword",
-                label: "matchingPassword.label",
-                placeholder: "matchingPassword.placeholder",
+                label: "auth.form.matchingPassword.label",
+                placeholder: "auth.form.matchingPassword.placeholder",
                 type: "password",
               }}
             />
 
             <Button loading={isPending} type="submit" variant="contained">
-              Reset password
+              {t("auth.resetPassword")}
             </Button>
 
             <Typography
@@ -108,7 +112,7 @@ export default function PasswordReset() {
               color="text.secondary"
               sx={{ my: 2 }}
             >
-              {t("or")}
+              {t("common.or")}
             </Typography>
 
             <Button
@@ -116,7 +120,7 @@ export default function PasswordReset() {
               onClick={handleClick}
               variant="outlined"
             >
-              {t("signin")}
+              {t("auth.signin")}
             </Button>
           </Box>
         </Form>

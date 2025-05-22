@@ -1,4 +1,129 @@
 {
-  "name": "First name",
-  "404": "The page you’re looking for doesn’t exist."
+  "common": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "or": "Or",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "goHome": "Go Home",
+    "add": "Add",
+    "close": "Close"
+  },
+  "auth": {
+    "form": {
+      "firstName": {
+        "label": "First Name",
+        "placeholder": "Enter your first name",
+        "required": "First name is required"
+      },
+      "lastName": {
+        "label": "Last Name",
+        "placeholder": "Enter your last name",
+        "required": "Last name is required"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email address",
+        "required": "Email is required",
+        "invalid": "Invalid email address"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password",
+        "required": "Password is required"
+      },
+      "matchingPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Re-enter your password",
+        "mustMatch": "Passwords must match"
+      }
+    },
+    "signup": "Sign Up",
+    "signin": "Sign In",
+    "resetPassword": "Reset Password"
+  },
+  "schedule": {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month"
+  },
+  "404": [
+    "404",
+    "Oops! Page not found.",
+    "The page you're looking for doesn't exist or has been moved."
+  ],
+  "units": {
+    "km": "Kilometers",
+    "mi": "Miles"
+  },
+  "home": {
+    "welcome": "Welcome to the ProxiMeet",
+    "description": "This project is a modern web application built with React and TypeScript, designed to deliver a responsive, maintainable, and scalable user interface. It incorporates Material UI for a sleek and consistent design system, while React Router handles seamless client-side routing. Internationalization is supported using i18next, enabling multi-language support and localization flexibility. The application features robust CRUD (Create, Read, Update, Delete) functionality, allowing users to manage data efficiently. Additionally, it includes authentication and authorization mechanisms to secure access. This tech stack ensures the application is well-suited for both development and production environments, emphasizing code quality, user experience, and security."
+  },
+  "event": {
+    "form": {
+      "addHeader": "Add Event",
+      "editHeader": "Edit Event",
+      "name": {
+        "label": "Event Name",
+        "placeholder": "Enter the event name",
+        "required": "Event name is required"
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Enter the event description",
+        "required": "Description is required"
+      },
+      "image": {
+        "label": "Image",
+        "placeholder": "Upload an image",
+        "required": "Image is required",
+        "valid": "Image must be valid"
+      },
+      "location": {
+        "label": "Location",
+        "placeholder": "Enter the event location",
+        "required": "Location is required",
+        "lat": {
+          "required": "Latitude is required",
+          "min": "Latitude must be at least -90",
+          "max": "Latitude must be at most 90"
+        },
+        "lng": {
+          "required": "Longitude is required",
+          "min": "Longitude must be at least -180",
+          "max": "Longitude must be at most 180"
+        }
+      },
+      "dateTimeRange": {
+        "label": "Date and Time Range",
+        "placeholder": "Select the date and time range",
+        "required": "Date and time range is required",
+        "start": {
+          "label": "Start Date and Time",
+          "placeholder": "Select the start date and time",
+          "required": "Start date and time is required",
+          "valid": "Start date and time must be valid"
+        },
+        "end": {
+          "label": "End Date and Time",
+          "placeholder": "Select the end date and time",
+          "required": "End date and time is required",
+          "valid": "End date and time must be valid",
+          "afterStart": "End date and time must be after the start date and time"
+        }
+      }
+    },
+    "attend": "Attend",
+    "resign": "Resign"
+  },
+  "sidenav": {
+    "dashboard": "Dashboard",
+    "schedule": "Schedule",
+    "near": "Nearby Events",
+    "all": "All Events",
+    "own": "My Events",
+    "logout": "Logout"
+  }
 }

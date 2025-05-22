@@ -26,6 +26,7 @@ import marker from "../../../assets/red-pin.png";
 import { useQuery } from "@tanstack/react-query";
 import { LocationContext } from "../../../location/location-context";
 import { getEventsNearLocation } from "../../../vendor/events-vendor";
+import { useTranslation } from "react-i18next";
 const myIcon = new Icon({
   iconUrl: marker,
   iconRetinaUrl: marker,
@@ -72,6 +73,7 @@ export default function NearYou() {
   const [unit, setUnit] = useState("km");
   const [pickedLocation, setPickedLocation] = useState(location);
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const { data } = useQuery({
     queryKey: ["near-events", { radius, unit, pickedLocation }],
@@ -129,8 +131,8 @@ export default function NearYou() {
           autoWidth
           size="small"
         >
-          <MenuItem value={"km"}>Kilometers</MenuItem>
-          <MenuItem value={"mi"}>Miles</MenuItem>
+          <MenuItem value={"km"}>{t("units.km")}</MenuItem>
+          <MenuItem value={"mi"}>{t("units.mi")}</MenuItem>
         </Select>
       </Toolbar>
       <MapContainer

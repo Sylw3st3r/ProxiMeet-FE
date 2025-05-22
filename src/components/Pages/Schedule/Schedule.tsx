@@ -32,6 +32,7 @@ import {
 } from "date-fns";
 import { useQuery } from "@tanstack/react-query";
 import { getScheduleEvents } from "../../../vendor/events-vendor";
+import { useTranslation } from "react-i18next";
 
 type mode = "day" | "week" | "month";
 
@@ -49,6 +50,7 @@ const Schedule = () => {
   });
 
   const theme = useTheme();
+  const { t } = useTranslation();
 
   const handleModeChange = (_: unknown, newMode: mode) => {
     setMode(newMode);
@@ -125,9 +127,9 @@ const Schedule = () => {
         }}
       >
         <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange}>
-          <ToggleButton value="day">Day</ToggleButton>
-          <ToggleButton value="week">Week</ToggleButton>
-          <ToggleButton value="month">Month</ToggleButton>
+          <ToggleButton value="day">{t("schedule.day")}</ToggleButton>
+          <ToggleButton value="week">{t("schedule.week")}</ToggleButton>
+          <ToggleButton value="month">{t("schedule.month")}</ToggleButton>
         </ToggleButtonGroup>
         <Box>
           <IconButton onClick={goPrevious}>

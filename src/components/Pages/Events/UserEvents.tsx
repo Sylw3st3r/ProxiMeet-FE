@@ -22,12 +22,14 @@ import {
 import { useConfirm } from "../../../hooks/useConfirm";
 import { Event } from "../../../model/event";
 import { Add } from "@mui/icons-material";
+import { useTranslation } from "react-i18next";
 
 const UserEvents = () => {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(20);
   const [search, setSearch] = useState("");
   const { confirm, ConfirmDialogComponent } = useConfirm();
+  const { t } = useTranslation();
 
   // Check if there are ovelpaing events
   // If yes then confirm with user that we want to proceed
@@ -82,7 +84,7 @@ const UserEvents = () => {
             navigate("add");
           }}
         >
-          Add
+          {t("common.add")}
         </Button>
         <Box flex={1} />
       </AllEventsToolbar>
@@ -94,7 +96,7 @@ const UserEvents = () => {
             <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
               <EventCard key={event.id} event={event}>
                 <ButtonGroup>
-                  <Tooltip title="Edit">
+                  <Tooltip title={t("common.edit")}>
                     <IconButton
                       disabled={deletionPending}
                       onClick={() => {
@@ -104,7 +106,7 @@ const UserEvents = () => {
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Delete">
+                  <Tooltip title={t("common.delete")}>
                     <IconButton
                       loading={deletionPending}
                       onClick={() => {

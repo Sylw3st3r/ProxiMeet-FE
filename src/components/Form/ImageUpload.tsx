@@ -134,7 +134,7 @@ export default function ImageUpload({
       <FormControl fullWidth error={showError} variant="standard">
         {label && (
           <InputLabel focused shrink htmlFor={`image-upload-${name}`}>
-            {label}
+            {t(label)}
           </InputLabel>
         )}
 
@@ -197,7 +197,7 @@ export default function ImageUpload({
           </Box>
         )}
 
-        {showError && <FormHelperText>{meta.error}</FormHelperText>}
+        {showError && <FormHelperText>{t(meta.error!)}</FormHelperText>}
       </FormControl>
 
       {/* Crop Dialog */}

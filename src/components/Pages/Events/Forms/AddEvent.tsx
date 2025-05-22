@@ -8,39 +8,36 @@ import { addEvent } from "../../../../vendor/events-vendor";
 
 const coordinatesSchema = Yup.object({
   lat: Yup.number()
-    .required("Latitude is required")
-    .min(-90, "Latitude must be greater than or equal to -90")
-    .max(90, "Latitude must be less than or equal to 90"),
+    .required("event.form.location.lat.required")
+    .min(-90, "event.form.location.lat.min")
+    .max(90, "event.form.location.lat.max"),
   lng: Yup.number()
-    .required("Longitude is required")
-    .min(-180, "Longitude must be greater than or equal to -180")
-    .max(180, "Longitude must be less than or equal to 180"),
+    .required("event.form.location.lng.required")
+    .min(-180, "event.form.location.lng.min")
+    .max(180, "event.form.location.lng.max"),
 });
 
 const VALIDATOR = Yup.object({
-  name: Yup.string().required("name.required"),
-  description: Yup.string().required("description.required"),
+  name: Yup.string().required("event.form.name.required"),
+  description: Yup.string().required("event.form.description.required"),
   image: Yup.mixed()
-    .required("Image is required")
-    .test("fileType", "Only images are allowed", (value) => {
+    .required("event.form.image.required")
+    .test("fileType", "event.form.image.valid", (value) => {
       return (
         value &&
         ["image/jpeg", "image/png", "image/jpg"].includes((value as any).type)
       );
     }),
-  location: coordinatesSchema.required("Location is required"),
+  location: coordinatesSchema.required("event.form.location.required"),
   dateTimeRange: Yup.object({
     start: Yup.date()
-      .required("Start date is required")
-      .typeError("Start date must be a valid date"),
+      .required("event.form.dateTimeRange.start.required")
+      .typeError("event.form.dateTimeRange.start.valid"),
     end: Yup.date()
-      .required("End date is required")
-      .typeError("End date must be a valid date")
-      .min(
-        Yup.ref("start"),
-        "End date must be later than or equal to start date",
-      ),
-  }).required("Date range is required"),
+      .required("event.form.dateTimeRange.end.required")
+      .typeError("event.form.dateTimeRange.end.valid")
+      .min(Yup.ref("start"), "event.form.dateTimeRange.end.afterStart"),
+  }).required("event.form.dateTimeRange.required"),
 });
 
 const INITIAL_VALUES = {
@@ -84,8 +81,8 @@ export default function AddEventModal() {
       VALIDATOR={VALIDATOR}
       onClose={onClose}
       mutationPending={isPending}
-      headerText="Add event"
-      submitButtonText="Add"
+      headerText="event.form.addHeader"
+      submitButtonText="common.add"
     />
   );
 }

@@ -95,7 +95,7 @@ export default function LocationPicker({
             htmlFor={`location-picker-${name}`}
             sx={{ pointerEvents: "none" }} // prevent label blocking clicks
           >
-            {label}
+            {t(label)}
           </InputLabel>
         )}
 
@@ -139,7 +139,7 @@ export default function LocationPicker({
           </Typography>
         </Box>
 
-        {showError && <FormHelperText>{meta.error}</FormHelperText>}
+        {showError && <FormHelperText>{t(meta.error!)}</FormHelperText>}
       </FormControl>
       {address && (
         <TextField

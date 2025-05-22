@@ -6,7 +6,8 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import React, { useState } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -18,23 +19,25 @@ interface ConfirmDialogProps {
 
 function ConfirmDialog({
   open,
-  title = "Confirm",
+  title = "common.confirm",
   message,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation();
+
   return (
     <Dialog open={open} onClose={onCancel}>
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{t(title)}</DialogTitle>
       <DialogContent>
         <Typography>{message}</Typography>
       </DialogContent>
       <DialogActions>
         <Button onClick={onCancel} color="primary">
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button onClick={onConfirm} color="primary" variant="contained">
-          Confirm
+          {t("common.confirm")}
         </Button>
       </DialogActions>
     </Dialog>

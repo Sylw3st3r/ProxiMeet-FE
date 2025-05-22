@@ -1,8 +1,10 @@
 import { Box, Typography, Button } from "@mui/material";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
 const PageNotFound = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   return (
     <Box
@@ -14,16 +16,16 @@ const PageNotFound = () => {
       }}
     >
       <Typography variant="h1" component="div" color="primary" gutterBottom>
-        404
+        {t("404[0]")}
       </Typography>
       <Typography variant="h5" color="text.secondary" gutterBottom>
-        Oops! Page not found.
+        {t("404[1]")}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-        The page you're looking for doesn't exist or has been moved.
+        {t("404[2]")}
       </Typography>
       <Button variant="contained" color="primary" onClick={() => navigate("/")}>
-        Go Home
+        {t("common.goHome")}
       </Button>
     </Box>
   );

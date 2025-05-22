@@ -2,13 +2,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import "./translations/i18n";
 import AuthProvider from "./authentication/AuthProvider";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AxiosInterceptor from "./interceptor/AxiosInterceptor";
 import LocationProvider from "./location/LocationProvider";
+import TranslationProvider from "./translations/TranslationProvider";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement,
@@ -25,17 +25,19 @@ root.render(
         },
       })}
     >
-      <SnackbarProvider autoHideDuration={4000}>
-        <QueryClientProvider client={client}>
-          <AuthProvider>
-            <LocationProvider>
-              <AxiosInterceptor>
-                <App />
-              </AxiosInterceptor>
-            </LocationProvider>
-          </AuthProvider>
-        </QueryClientProvider>
-      </SnackbarProvider>
+      <TranslationProvider>
+        <SnackbarProvider autoHideDuration={4000}>
+          <QueryClientProvider client={client}>
+            <AuthProvider>
+              <LocationProvider>
+                <AxiosInterceptor>
+                  <App />
+                </AxiosInterceptor>
+              </LocationProvider>
+            </AuthProvider>
+          </QueryClientProvider>
+        </SnackbarProvider>
+      </TranslationProvider>
     </ThemeProvider>
   </React.StrictMode>,
 );

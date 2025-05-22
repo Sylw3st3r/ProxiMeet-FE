@@ -2,7 +2,7 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import FormInput from "../../Form/Input";
+import FormInput from "../../Form/FormInput";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
@@ -12,46 +12,52 @@ import { AxiosError } from "axios";
 const INPUT_FIELDS_DEFINITIONS = [
   {
     name: "firstName",
-    label: "firstName.label",
-    placeholder: "firstName.placeholder",
+    label: "auth.form.firstName.label",
+    placeholder: "auth.form.firstName.placeholder",
     type: "text",
   },
   {
     name: "lastName",
-    label: "lastName.label",
-    placeholder: "lastName.placeholder",
+    label: "auth.form.lastName.label",
+    placeholder: "auth.form.lastName.placeholder",
     type: "text",
   },
   {
     name: "email",
-    label: "email.label",
-    placeholder: "email.placeholder",
+    label: "auth.form.email.label",
+    placeholder: "auth.form.email.placeholder",
     type: "email",
   },
   {
     name: "password",
-    label: "password.label",
-    placeholder: "password.required",
+    label: "auth.form.password.label",
+    placeholder: "auth.form.password.required",
     type: "password",
   },
   {
     name: "matchingPassword",
-    label: "matchingPassword.label",
-    placeholder: "matchingPassword.placeholder",
+    label: "auth.form.matchingPassword.label",
+    placeholder: "auth.form.matchingPassword.placeholder",
     type: "password",
   },
 ];
 
 const VALIDATOR = Yup.object({
-  firstName: Yup.string().required("firstName.required"),
-  lastName: Yup.string().required("lastName.required"),
-  email: Yup.string().required("email.required").email("email.invalid"),
-  password: Yup.string().required("password.required"),
+  firstName: Yup.string().required("auth.form.firstName.required"),
+  lastName: Yup.string().required("auth.form.lastName.required"),
+  email: Yup.string()
+    .required("auth.form.email.required")
+    .email("auth.form.email.invalid"),
+  password: Yup.string().required("auth.form.password.required"),
   matchingPassword: Yup.string()
-    .required("password.required")
-    .test("passwords-match", "matchingPassword.match", function (value) {
-      return this.parent.password === value;
-    }),
+    .required("auth.form.password.required")
+    .test(
+      "passwords-match",
+      "auth.form.matchingPassword.mustMatch",
+      function (value) {
+        return this.parent.password === value;
+      },
+    ),
 });
 
 const INITIAL_VALUES = {
@@ -127,7 +133,7 @@ export default function SignUp() {
             ))}
 
             <Button loading={isPending} type="submit" variant="contained">
-              signup
+              {t("auth.signup")}
             </Button>
 
             <Typography
@@ -135,7 +141,7 @@ export default function SignUp() {
               color="text.secondary"
               sx={{ my: 2 }}
             >
-              {t("or")}
+              {t("common.or")}
             </Typography>
 
             <Button
@@ -143,7 +149,7 @@ export default function SignUp() {
               onClick={handleClick}
               variant="outlined"
             >
-              {t("signin")}
+              {t("auth.signin")}
             </Button>
           </Box>
         </Form>

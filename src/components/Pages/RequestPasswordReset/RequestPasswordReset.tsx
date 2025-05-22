@@ -2,14 +2,16 @@ import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
 import { Box, Button, Typography, useTheme } from "@mui/material";
-import FormInput from "../../Form/Input";
+import FormInput from "../../Form/FormInput";
 import { useNavigate } from "react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useSnackbar } from "notistack";
 import { requestPasswordResetToken } from "../../../vendor/auth-vendor";
 
 const VALIDATOR = Yup.object({
-  email: Yup.string().required("email.required").email("email.invalid"),
+  email: Yup.string()
+    .required("auth.form.email.required")
+    .email("auth.form.email.invalid"),
 });
 
 const INITIAL_VALUES = {
@@ -76,21 +78,21 @@ export default function RequestPasswordReset() {
               variant="standard"
               {...{
                 name: "email",
-                label: "email.label",
-                placeholder: "email.placeholder",
+                label: "auth.form.email.label",
+                placeholder: "auth.form.email.placeholder",
                 type: "email",
               }}
             />
 
             <Button loading={isPending} type="submit" variant="contained">
-              Request password change
+              {t("auth.resetPassword")}
             </Button>
             <Typography
               textAlign="center"
               color="text.secondary"
               sx={{ my: 2 }}
             >
-              {t("or")}
+              {t("common.or")}
             </Typography>
 
             <Button
@@ -98,7 +100,7 @@ export default function RequestPasswordReset() {
               onClick={handleClick}
               variant="outlined"
             >
-              {t("signin")}
+              {t("auth.signin")}
             </Button>
           </Box>
         </Form>

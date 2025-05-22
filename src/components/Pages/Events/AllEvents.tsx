@@ -21,16 +21,18 @@ import {
   resignFromAttendingEvent,
 } from "../../../vendor/events-vendor";
 import { client } from "../../..";
+import { useTranslation } from "react-i18next";
 
 export default function AllEvents() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [limit, setLimit] = useState(20);
   const { confirm, ConfirmDialogComponent } = useConfirm();
+  const { t } = useTranslation();
 
-  // Check if there are ovelpaing events
+  // Check if there are overlapping events
   // If yes then confirm with user that we want to proceed
-  // If no then proceed automaticly
+  // If there are no overlapping events then proceed
   const attendEventRequestHandler = async (id: number) => {
     const overlapingEvents = await checkEventOverlapHandler(id);
 
@@ -96,7 +98,7 @@ export default function AllEvents() {
               <EventCard key={event.id} event={event}>
                 <ButtonGroup>
                   {event.attending ? (
-                    <Tooltip title="Resign">
+                    <Tooltip title={t("event.resign")}>
                       <IconButton
                         disabled={resignFromAttendEventMutationPending}
                         onClick={() => {
@@ -107,7 +109,7 @@ export default function AllEvents() {
                       </IconButton>
                     </Tooltip>
                   ) : (
-                    <Tooltip title="Attend">
+                    <Tooltip title={t("event.attend")}>
                       <IconButton
                         disabled={attendEventMutationPending}
                         onClick={() => {

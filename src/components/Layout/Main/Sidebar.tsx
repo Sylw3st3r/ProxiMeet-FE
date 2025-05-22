@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import {
   Drawer,
   List,
@@ -12,8 +12,6 @@ import {
   IconButton,
   Box,
   useTheme,
-  Switch,
-  useColorScheme,
 } from "@mui/material";
 import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -23,37 +21,40 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { CalendarViewDay, ExitToApp } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../../authentication/auth-context";
+import { useTranslation } from "react-i18next";
+import { LanguageMenu } from "../../Settings/LanguageMenu";
+import ThemeSwitch from "../../Settings/ThemeSwitch";
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 const iconOnlyWidth = 60;
 
 const navItems = [
   {
-    label: "Dashboard",
+    label: "sidenav.dashboard",
     icon: <DashboardIcon />,
     path: "/dashboard",
     end: true,
   },
   {
-    label: "All Events",
+    label: "sidenav.all",
     icon: <DashboardIcon />,
     path: "/dashboard/events",
     end: false,
   },
   {
-    label: "Your Events",
+    label: "sidenav.own",
     icon: <MailIcon />,
     path: "/dashboard/user-events",
     end: false,
   },
   {
-    label: "Near You",
+    label: "sidenav.near",
     icon: <MapIcon />,
     path: "/dashboard/near-you",
     end: false,
   },
   {
-    label: "Schedule",
+    label: "sidenav.schedule",
     icon: <CalendarViewDay></CalendarViewDay>,
     path: "/dashboard/schedule",
     end: false,
@@ -64,7 +65,7 @@ export default function SidebarNav() {
   const { logOut } = useContext(AuthContext);
   const theme = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { mode, setMode } = useColorScheme();
+  const { t } = useTranslation();
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -149,7 +150,7 @@ export default function SidebarNav() {
                       {item.icon}
                     </ListItemIcon>
                     <ListItemText
-                      primary={item.label}
+                      primary={t(item.label)}
                       primaryTypographyProps={{
                         color: isActive
                           ? theme.palette.primary.main
@@ -182,12 +183,19 @@ export default function SidebarNav() {
           flexDirection: "column",
         }}
       >
-        <Switch
-          value={mode === "light" ? "dark" : "light"}
-          onClick={() => {
-            setMode(mode === "light" ? "dark" : "light");
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row",
+            flexWrap: "wrap",
+            justifyContent: "flex-start",
+            alignItems: "center",
           }}
-        />
+        >
+          <LanguageMenu marginLeft={1.5} />
+          <ThemeSwitch />
+        </Box>
         <ListItem disablePadding>
           <ListItemButton
             onClick={logOut}
@@ -200,7 +208,7 @@ export default function SidebarNav() {
               <ExitToApp />
             </ListItemIcon>
             <ListItemText
-              primary="Logout"
+              primary={t("sidenav.logout")}
               primaryTypographyProps={{
                 color: "inherit",
                 fontWeight: "normal",

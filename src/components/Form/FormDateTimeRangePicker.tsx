@@ -12,15 +12,15 @@ type DateTimePickerChangeValue = DateTimePickerProps["value"];
 
 export default function FormDateTimeRange({
   name,
-  labelStart = "Start Date",
-  labelEnd = "End Date",
+  labelStart,
+  labelEnd,
   disabled,
 }: {
   name: string;
   label: string;
   placeholder: string;
-  labelStart?: string;
-  labelEnd?: string;
+  labelStart: string;
+  labelEnd: string;
   disabled?: boolean;
 }) {
   const { t } = useTranslation();
@@ -65,8 +65,9 @@ export default function FormDateTimeRange({
               fullWidth: true,
               variant: "standard",
               error: Boolean(endMeta.touched && endMeta.error),
-              helperText:
+              helperText: t(
                 endMeta.touched && endMeta.error ? t(endMeta.error) : "",
+              ),
             },
           }}
         />

@@ -1,4 +1,129 @@
 {
-  "name": "Imię",
-  "404": "Strona, której szukasz nie istnieje."
+  "common": {
+    "confirm": "Potwierdź",
+    "cancel": "Anuluj",
+    "or": "Lub",
+    "save": "Zapisz",
+    "edit": "Edytuj",
+    "delete": "Usuń",
+    "goHome": "Idź do Strony Głównej",
+    "add": "Dodaj",
+    "close": "Zamknij"
+  },
+  "auth": {
+    "form": {
+      "firstName": {
+        "label": "Imię",
+        "placeholder": "Wpisz swoje imię",
+        "required": "Imię jest wymagane"
+      },
+      "lastName": {
+        "label": "Nazwisko",
+        "placeholder": "Wpisz swoje nazwisko",
+        "required": "Nazwisko jest wymagane"
+      },
+      "email": {
+        "label": "Email",
+        "placeholder": "Wpisz swój adres email",
+        "required": "Email jest wymagany",
+        "invalid": "Nieprawidłowy adres email"
+      },
+      "password": {
+        "label": "Hasło",
+        "placeholder": "Wpisz swoje hasło",
+        "required": "Hasło jest wymagane"
+      },
+      "matchingPassword": {
+        "label": "Potwierdź Hasło",
+        "placeholder": "Wpisz ponownie swoje hasło",
+        "mustMatch": "Hasła muszą się zgadzać"
+      }
+    },
+    "signup": "Zarejestruj się",
+    "signin": "Zaloguj się",
+    "resetPassword": "Zresetuj Hasło"
+  },
+  "schedule": {
+    "day": "Dzień",
+    "week": "Tydzień",
+    "month": "Miesiąc"
+  },
+  "404": [
+    "404",
+    "Ups! Strona nie znaleziona.",
+    "Strona, której szukasz, nie istnieje lub została przeniesiona."
+  ],
+  "units": {
+    "km": "Kilometry",
+    "mi": "Mile"
+  },
+  "home": {
+    "welcome": "Witamy w ProxiMeet",
+    "description": "Ten projekt to nowoczesna aplikacja internetowa zbudowana przy użyciu React i TypeScript, zaprojektowana, aby dostarczyć responsywny, łatwy w utrzymaniu i skalowalny interfejs użytkownika. Wykorzystuje Material UI dla eleganckiego i spójnego systemu projektowania, a React Router obsługuje płynne routowanie po stronie klienta. Międzynarodowość jest wspierana za pomocą i18next, umożliwiając obsługę wielu języków i elastyczność lokalizacji. Aplikacja oferuje solidną funkcjonalność CRUD (Tworzenie, Odczyt, Aktualizacja, Usuwanie), pozwalając użytkownikom efektywnie zarządzać danymi. Dodatkowo zawiera mechanizmy uwierzytelniania i autoryzacji w celu zabezpieczenia dostępu. Ten stos technologiczny zapewnia, że aplikacja jest dobrze dostosowana zarówno do środowisk deweloperskich, jak i produkcyjnych, kładąc nacisk na jakość kodu, doświadczenie użytkownika i bezpieczeństwo."
+  },
+  "event": {
+    "form": {
+      "addHeader": "Dodaj Wydarzenie",
+      "editHeader": "Edytuj Wydarzenie",
+      "name": {
+        "label": "Nazwa Wydarzenia",
+        "placeholder": "Wpisz nazwę wydarzenia",
+        "required": "Nazwa wydarzenia jest wymagana"
+      },
+      "description": {
+        "label": "Opis",
+        "placeholder": "Wpisz opis wydarzenia",
+        "required": "Opis jest wymagany"
+      },
+      "image": {
+        "label": "Obraz",
+        "placeholder": "Prześlij obraz",
+        "required": "Obraz jest wymagany",
+        "valid": "Obraz musi być prawidłowy"
+      },
+      "location": {
+        "label": "Lokalizacja",
+        "placeholder": "Wpisz lokalizację wydarzenia",
+        "required": "Lokalizacja jest wymagana",
+        "lat": {
+          "required": "Szerokość geograficzna jest wymagana",
+          "min": "Szerokość geograficzna musi wynosić co najmniej -90",
+          "max": "Szerokość geograficzna może wynosić maksymalnie 90"
+        },
+        "lng": {
+          "required": "Długość geograficzna jest wymagana",
+          "min": "Długość geograficzna musi wynosić co najmniej -180",
+          "max": "Długość geograficzna może wynosić maksymalnie 180"
+        }
+      },
+      "dateTimeRange": {
+        "label": "Zakres Daty i Czasu",
+        "placeholder": "Wybierz zakres daty i czasu",
+        "required": "Zakres daty i czasu jest wymagany",
+        "start": {
+          "label": "Data i Czas Rozpoczęcia",
+          "placeholder": "Wybierz datę i czas rozpoczęcia",
+          "required": "Data i czas rozpoczęcia są wymagane",
+          "valid": "Data i czas rozpoczęcia muszą być prawidłowe"
+        },
+        "end": {
+          "label": "Data i Czas Zakończenia",
+          "placeholder": "Wybierz datę i czas zakończenia",
+          "required": "Data i czas zakończenia są wymagane",
+          "valid": "Data i czas zakończenia muszą być prawidłowe",
+          "afterStart": "Data i czas zakończenia muszą być po dacie i czasie rozpoczęcia"
+        }
+      }
+    },
+    "attend": "Weź Udział",
+    "resign": "Zrezygnuj"
+  },
+  "sidenav": {
+    "dashboard": "Panel",
+    "schedule": "Harmonogram",
+    "near": "Wydarzenia w Pobliżu",
+    "all": "Wszystkie Wydarzenia",
+    "own": "Moje Wydarzenia",
+    "logout": "Wyloguj się"
+  }
 }
