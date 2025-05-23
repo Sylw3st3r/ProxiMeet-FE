@@ -1,15 +1,8 @@
-import {
-  Box,
-  MenuItem,
-  Pagination,
-  Select,
-  TextField,
-  Toolbar,
-  useTheme,
-} from "@mui/material";
+import { Box, MenuItem, Pagination, Select, TextField } from "@mui/material";
 import { ReactNode } from "react";
+import BlankToolbar from "./BlankToolbar";
 
-export default function AllEventsToolbar({
+export default function CommonToolabr({
   search,
   setSearch,
   page,
@@ -28,19 +21,8 @@ export default function AllEventsToolbar({
   setLimit: (value: number) => void;
   children?: ReactNode;
 }) {
-  const theme = useTheme();
-
   return (
-    <Toolbar
-      sx={{
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        position: "sticky",
-        top: 0,
-        zIndex: 200,
-        bgcolor: theme.palette.background.paper,
-        flexWrap: "wrap",
-      }}
-    >
+    <BlankToolbar>
       <TextField
         size="small"
         value={search}
@@ -72,6 +54,6 @@ export default function AllEventsToolbar({
         variant="outlined"
         color="primary"
       />
-    </Toolbar>
+    </BlankToolbar>
   );
 }

@@ -6,7 +6,7 @@ import AuthProvider from "./authentication/AuthProvider";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AxiosInterceptor from "./interceptor/AxiosInterceptor";
+import AxiosInterceptor from "./hooks/useAxiosInterceptor";
 import LocationProvider from "./location/LocationProvider";
 import TranslationProvider from "./translations/TranslationProvider";
 
@@ -30,9 +30,7 @@ root.render(
           <QueryClientProvider client={client}>
             <AuthProvider>
               <LocationProvider>
-                <AxiosInterceptor>
-                  <App />
-                </AxiosInterceptor>
+                <App />
               </LocationProvider>
             </AuthProvider>
           </QueryClientProvider>

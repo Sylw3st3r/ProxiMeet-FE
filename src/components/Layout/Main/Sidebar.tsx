@@ -12,23 +12,31 @@ import {
   IconButton,
   Box,
   useTheme,
+  Badge,
 } from "@mui/material";
 import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
-import MapIcon from "@mui/icons-material/Map";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { CalendarViewDay, ExitToApp } from "@mui/icons-material";
+import {
+  CalendarMonth,
+  ExitToApp,
+  ListAltSharp,
+  PlaylistAddSharp,
+  TrackChanges,
+} from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import { AuthContext } from "../../../authentication/auth-context";
 import { useTranslation } from "react-i18next";
 import { LanguageMenu } from "../../Settings/LanguageMenu";
 import ThemeSwitch from "../../Settings/ThemeSwitch";
+import { useQuery } from "@tanstack/react-query";
+import { getUnseenNotificationsCount } from "../../../vendor/notifications-vendor";
 
 const drawerWidth = 280;
 const iconOnlyWidth = 60;
 
-const navItems = [
+const navItems = (unseenNotificationsCount: number | undefined) => [
   {
     label: "sidenav.dashboard",
     icon: <DashboardIcon />,
@@ -37,26 +45,38 @@ const navItems = [
   },
   {
     label: "sidenav.all",
-    icon: <DashboardIcon />,
+    icon: <ListAltSharp />,
     path: "/dashboard/events",
     end: false,
   },
   {
     label: "sidenav.own",
-    icon: <MailIcon />,
+    icon: <PlaylistAddSharp />,
     path: "/dashboard/user-events",
     end: false,
   },
   {
     label: "sidenav.near",
-    icon: <MapIcon />,
+    icon: <TrackChanges />,
     path: "/dashboard/near-you",
     end: false,
   },
   {
     label: "sidenav.schedule",
-    icon: <CalendarViewDay></CalendarViewDay>,
+    icon: <CalendarMonth />,
     path: "/dashboard/schedule",
+    end: false,
+  },
+  {
+    label: "sidenav.inbox",
+    icon: unseenNotificationsCount ? (
+      <Badge badgeContent={unseenNotificationsCount} color="secondary">
+        <MailIcon />
+      </Badge>
+    ) : (
+      <MailIcon />
+    ),
+    path: "/dashboard/inbox",
     end: false,
   },
 ];
@@ -66,6 +86,15 @@ export default function SidebarNav() {
   const theme = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { t } = useTranslation();
+
+  // Polling every 30s to check if we have something new in inbox
+  // At the beggining used websockets to inform user about new notification
+  // Decided that it was an overkill
+  const { data } = useQuery({
+    queryKey: ["unseen-notifications-count"],
+    queryFn: ({ signal }) => getUnseenNotificationsCount(signal),
+    refetchInterval: 30000,
+  });
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -117,7 +146,7 @@ export default function SidebarNav() {
         </Toolbar>
         <Divider />
         <List>
-          {navItems.map((item) => (
+          {navItems(data).map((item) => (
             <NavLink
               key={item.label}
               to={item.path}

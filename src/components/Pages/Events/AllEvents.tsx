@@ -10,7 +10,6 @@ import {
 import { Outlet } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import EventCard from "./EventCard";
-import AllEventsToolbar from "./AllEventsToolbar";
 import { useConfirm } from "../../../hooks/useConfirm";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import HowToRegIcon from "@mui/icons-material/HowToReg";
@@ -22,6 +21,7 @@ import {
 } from "../../../vendor/events-vendor";
 import { client } from "../../..";
 import { useTranslation } from "react-i18next";
+import CommonToolabr from "../../Toolbar/CommonToolbar";
 
 export default function AllEvents() {
   const [page, setPage] = useState(1);
@@ -78,7 +78,7 @@ export default function AllEvents() {
   return (
     <Box>
       {ConfirmDialogComponent}
-      <AllEventsToolbar
+      <CommonToolabr
         {...{
           search,
           setSearch,
@@ -88,7 +88,7 @@ export default function AllEvents() {
           setLimit,
           totalPages: data?.totalPages,
         }}
-      ></AllEventsToolbar>
+      ></CommonToolabr>
       {isLoading ? (
         <LinearProgress color="primary" />
       ) : data && data.events.length ? (

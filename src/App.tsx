@@ -19,11 +19,12 @@ import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
 import "leaflet/dist/leaflet.css";
 import UserEvents from "./components/Pages/Events/UserEvents";
-import { useColorScheme } from "@mui/material";
 import AllEvents from "./components/Pages/Events/AllEvents";
 import RequestPasswordReset from "./components/Pages/RequestPasswordReset/RequestPasswordReset";
 import PasswordReset from "./components/Pages/PasswordReset/PasswordReset";
 import Schedule from "./components/Pages/Schedule/Schedule";
+import useAxiosInterceptor from "./hooks/useAxiosInterceptor";
+import Inbox from "./components/Pages/Inbox/Inbox";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -64,6 +65,10 @@ const createRouter = (token: string | null) =>
           path: "schedule",
           Component: Schedule,
         },
+        {
+          path: "inbox",
+          Component: Inbox,
+        },
       ],
     },
     {
@@ -96,10 +101,14 @@ const createRouter = (token: string | null) =>
   ]);
 
 export default function App() {
-  const { token, dataLoading } = useContext(AuthContext);
-  const { mode } = useColorScheme();
+  const { token, dataLoading, isLoggedIn } = useContext(AuthContext);
+  const { interceptorReady } = useAxiosInterceptor(token);
 
-  if (dataLoading || !mode) {
+  if (dataLoading) {
+    return null;
+  }
+
+  if (isLoggedIn && !interceptorReady) {
     return null;
   }
 

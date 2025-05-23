@@ -7,7 +7,6 @@ import {
   IconButton,
   useTheme,
   LinearProgress,
-  Toolbar,
 } from "@mui/material";
 import {
   ChevronLeft,
@@ -33,6 +32,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { getScheduleEvents } from "../../../vendor/events-vendor";
 import { useTranslation } from "react-i18next";
+import BlankToolbar from "../../Toolbar/BlankToolbar";
 
 type mode = "day" | "week" | "month";
 
@@ -115,17 +115,7 @@ const Schedule = () => {
 
   return (
     <Box position={"relative"}>
-      <Toolbar
-        sx={{
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          position: "sticky",
-          top: 0,
-          zIndex: 200,
-          bgcolor: theme.palette.background.paper,
-          justifyContent: "space-between",
-          flexWrap: "wrap",
-        }}
-      >
+      <BlankToolbar>
         <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange}>
           <ToggleButton value="day">{t("schedule.day")}</ToggleButton>
           <ToggleButton value="week">{t("schedule.week")}</ToggleButton>
@@ -142,7 +132,7 @@ const Schedule = () => {
             <ChevronRight />
           </IconButton>
         </Box>
-      </Toolbar>
+      </BlankToolbar>
 
       <Box p={2}>
         <Box mt={2} mb={1}>

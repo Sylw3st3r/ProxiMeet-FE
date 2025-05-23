@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import {
   Box,
   Card,
@@ -7,7 +7,6 @@ import {
   Dialog,
   Typography,
   useTheme,
-  Toolbar,
   Select,
   MenuItem,
 } from "@mui/material";
@@ -27,6 +26,7 @@ import { useQuery } from "@tanstack/react-query";
 import { LocationContext } from "../../../location/location-context";
 import { getEventsNearLocation } from "../../../vendor/events-vendor";
 import { useTranslation } from "react-i18next";
+import BlankToolbar from "../../Toolbar/BlankToolbar";
 const myIcon = new Icon({
   iconUrl: marker,
   iconRetinaUrl: marker,
@@ -103,14 +103,7 @@ export default function NearYou() {
       flexDirection={"column"}
       style={{ height: "100vh", width: "100%", display: "flex" }}
     >
-      <Toolbar
-        sx={{
-          borderBottom: `1px solid ${theme.palette.divider}`,
-          zIndex: 200,
-          bgcolor: theme.palette.background.paper,
-          flexWrap: "wrap",
-        }}
-      >
+      <BlankToolbar>
         <Select
           value={radius}
           onChange={(event) => {
@@ -134,7 +127,7 @@ export default function NearYou() {
           <MenuItem value={"km"}>{t("units.km")}</MenuItem>
           <MenuItem value={"mi"}>{t("units.mi")}</MenuItem>
         </Select>
-      </Toolbar>
+      </BlankToolbar>
       <MapContainer
         center={[pickedLocation.lat, pickedLocation.lng]}
         zoom={9}

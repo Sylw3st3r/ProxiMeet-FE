@@ -12,7 +12,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Outlet, useNavigate } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import AllEventsToolbar from "./AllEventsToolbar";
 import { client } from "../../..";
 import EventCard from "./EventCard";
 import {
@@ -23,6 +22,7 @@ import { useConfirm } from "../../../hooks/useConfirm";
 import { Event } from "../../../model/event";
 import { Add } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
+import CommonToolabr from "../../Toolbar/CommonToolbar";
 
 const UserEvents = () => {
   const [page, setPage] = useState(1);
@@ -65,7 +65,7 @@ const UserEvents = () => {
   return (
     <Box>
       {ConfirmDialogComponent}
-      <AllEventsToolbar
+      <CommonToolabr
         {...{
           search,
           setSearch,
@@ -87,7 +87,7 @@ const UserEvents = () => {
           {t("common.add")}
         </Button>
         <Box flex={1} />
-      </AllEventsToolbar>
+      </CommonToolabr>
       {isPending ? (
         <LinearProgress color="primary" />
       ) : data ? (

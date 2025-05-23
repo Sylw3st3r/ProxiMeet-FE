@@ -124,6 +124,7 @@
     "near": "Nearby Events",
     "all": "All Events",
     "own": "My Events",
-    "logout": "Logout"
+    "logout": "Logout",
+    "inbox": "Inbox"
   }
 }
