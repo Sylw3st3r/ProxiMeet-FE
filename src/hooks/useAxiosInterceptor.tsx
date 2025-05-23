@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { AuthContext } from "../authentication/auth-context";
 
-export default function useAxiosInterceptor(token: string | null) {
+export default function useAxiosInterceptor() {
   const [interceptorReady, setInterceptorReady] = useState(false);
+  const { token } = useContext(AuthContext);
 
   useEffect(() => {
     if (token) {

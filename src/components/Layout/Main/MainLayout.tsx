@@ -7,11 +7,11 @@ import { LocationContext } from "../../../location/location-context";
 import LocationRequiredView from "../../Pages/LocationRequiredView";
 
 export default function MainLayout() {
-  const { isLoggedIn } = useContext(AuthContext);
+  const { refreshToken } = useContext(AuthContext);
   const { location } = useContext(LocationContext);
   const theme = useTheme();
 
-  if (!isLoggedIn) {
+  if (!refreshToken) {
     return <Navigate to="/" />;
   }
 

@@ -1,13 +1,10 @@
-import React, { useState } from "react";
 import {
   Grid,
-  Box,
-  LinearProgress,
   ButtonGroup,
   Tooltip,
   IconButton,
+  Typography,
 } from "@mui/material";
-import { Outlet } from "react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import EventCard from "./EventCard";
 import { useConfirm } from "../../../hooks/useConfirm";
@@ -22,13 +19,20 @@ import {
 import { client } from "../../..";
 import { useTranslation } from "react-i18next";
 import CommonToolabr from "../../Toolbar/CommonToolbar";
+import useQueryParamControls from "../../../hooks/useQueryParamsControls";
 
-export default function AllEvents() {
-  const [page, setPage] = useState(1);
-  const [search, setSearch] = useState("");
-  const [limit, setLimit] = useState(20);
+function useAllEventsData(search: string, page: number, limit: number) {
+  // Fetch all events
+  const { data, isPending: allEventsPending } = useQuery({
+    queryKey: ["events", { search, page, limit }],
+    queryFn: ({ signal }) => getAllEventsData(signal, search, page, limit),
+  });
+
+  return { data, allEventsPending };
+}
+
+function useAttendEventMutation() {
   const { confirm, ConfirmDialogComponent } = useConfirm();
-  const { t } = useTranslation();
 
   // Check if there are overlapping events
   // If yes then confirm with user that we want to proceed
@@ -49,7 +53,7 @@ export default function AllEvents() {
     return attendEvent(id);
   };
 
-  const { mutate: attendEventMutation, isPending: attendEventMutationPending } =
+  const { mutate: attendEventMutation, isPending: attendEventPending } =
     useMutation({
       mutationFn: attendEventRequestHandler,
       onSuccess: () => {
@@ -58,9 +62,13 @@ export default function AllEvents() {
       },
     });
 
+  return { ConfirmDialogComponent, attendEventMutation, attendEventPending };
+}
+
+function useResignFromAttendEvent() {
   const {
     mutate: resignFromAttendEventMutation,
-    isPending: resignFromAttendEventMutationPending,
+    isPending: resignFromEventPending,
   } = useMutation({
     mutationFn: resignFromAttendingEvent,
     onSuccess: () => {
@@ -68,30 +76,70 @@ export default function AllEvents() {
       client.invalidateQueries({ queryKey: ["events"] });
     },
   });
+  return { resignFromAttendEventMutation, resignFromEventPending };
+}
 
-  // Fetch all events
-  const { data, isLoading } = useQuery({
-    queryKey: ["events", { search, page, limit }],
-    queryFn: ({ signal }) => getAllEventsData(signal, search, page, limit),
-  });
+// Hook responsible for data fetching, mutations and state manipulation of AllEvents component
+function useAllEventsControler() {
+  // Handles query params
+  const params = useQueryParamControls();
+  // Handles events data requests
+  const { data, allEventsPending } = useAllEventsData(
+    params.debouncedSearch,
+    params.page,
+    params.limit,
+  );
+  // Handles request for marking events as being attended by himself
+  const { attendEventMutation, ConfirmDialogComponent, attendEventPending } =
+    useAttendEventMutation();
+  // Handles request for resigning from attendeding event
+  const { resignFromAttendEventMutation, resignFromEventPending } =
+    useResignFromAttendEvent();
 
-  return (
-    <Box>
+  // AllEvents toolbar + Confirmation popup
+  const AllEventsControls = (
+    <>
       {ConfirmDialogComponent}
       <CommonToolabr
-        {...{
-          search,
-          setSearch,
-          page,
-          setPage,
-          limit,
-          setLimit,
-          totalPages: data?.totalPages,
-        }}
-      ></CommonToolabr>
-      {isLoading ? (
-        <LinearProgress color="primary" />
-      ) : data && data.events.length ? (
+        isLoading={
+          allEventsPending || attendEventPending || resignFromEventPending
+        }
+        {...params}
+        totalPages={data?.totalPages}
+      />
+    </>
+  );
+
+  return {
+    data,
+    AllEventsControls,
+    resignFromAttendEventMutation,
+    attendEventMutation,
+  };
+}
+
+export default function AllEvents() {
+  const {
+    data,
+    AllEventsControls,
+    attendEventMutation,
+    resignFromAttendEventMutation,
+  } = useAllEventsControler();
+  const { t } = useTranslation();
+
+  const noData = data === undefined || data.events.length === 0;
+
+  return (
+    <>
+      {AllEventsControls}
+      {noData ? (
+        <Typography
+          variant="body1"
+          sx={{ textAlign: "center", color: "text.secondary", mt: 4 }}
+        >
+          No events to show.
+        </Typography>
+      ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {data.events.map((event, index: number) => (
             <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
@@ -100,7 +148,6 @@ export default function AllEvents() {
                   {event.attending ? (
                     <Tooltip title={t("event.resign")}>
                       <IconButton
-                        disabled={resignFromAttendEventMutationPending}
                         onClick={() => {
                           resignFromAttendEventMutation(event.id);
                         }}
@@ -111,7 +158,6 @@ export default function AllEvents() {
                   ) : (
                     <Tooltip title={t("event.attend")}>
                       <IconButton
-                        disabled={attendEventMutationPending}
                         onClick={() => {
                           attendEventMutation(event.id);
                         }}
@@ -125,10 +171,7 @@ export default function AllEvents() {
             </Grid>
           ))}
         </Grid>
-      ) : (
-        <Box />
       )}
-      <Outlet></Outlet>
-    </Box>
+    </>
   );
 }

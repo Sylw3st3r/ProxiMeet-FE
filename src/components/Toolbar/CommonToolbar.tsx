@@ -11,6 +11,7 @@ export default function CommonToolabr({
   limit,
   setLimit,
   children,
+  isLoading,
 }: {
   search: string;
   setSearch: (value: string) => void;
@@ -20,17 +21,17 @@ export default function CommonToolabr({
   limit: number;
   setLimit: (value: number) => void;
   children?: ReactNode;
+  isLoading?: boolean;
 }) {
   return (
-    <BlankToolbar>
+    <BlankToolbar isLoading={isLoading}>
       <TextField
         size="small"
         value={search}
         onChange={(event) => {
           setSearch(event.target.value);
-          setPage(1);
         }}
-      />{" "}
+      />
       <Box sx={{ flex: 1 }} />
       {children}
       <Box sx={{ flex: 1 }} />

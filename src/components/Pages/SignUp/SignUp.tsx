@@ -68,15 +68,14 @@ const INITIAL_VALUES = {
   matchingPassword: "",
 };
 
-export default function SignUp() {
-  const { t } = useTranslation();
-  const theme = useTheme();
+function useSignup() {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const { mutate, isPending } = useMutation({
+  const { mutate: signupMutate, isPending: signupPending } = useMutation({
     mutationFn: signup,
     onSuccess: () => {
-      handleClick();
+      navigate("/");
     },
     onError: (error: AxiosError<{ errorDescription: string }>) => {
       enqueueSnackbar(
@@ -86,11 +85,15 @@ export default function SignUp() {
       );
     },
   });
-  const { enqueueSnackbar } = useSnackbar();
 
-  const handleClick = () => {
-    navigate("/");
-  };
+  return { signupMutate, signupPending };
+}
+
+export default function SignUp() {
+  const { signupMutate, signupPending } = useSignup();
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -104,7 +107,7 @@ export default function SignUp() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(data) => mutate(data)}
+        onSubmit={(data) => signupMutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -132,7 +135,7 @@ export default function SignUp() {
               <FormInput variant="standard" key={index} {...definition} />
             ))}
 
-            <Button loading={isPending} type="submit" variant="contained">
+            <Button loading={signupPending} type="submit" variant="contained">
               {t("auth.signup")}
             </Button>
 
@@ -145,8 +148,10 @@ export default function SignUp() {
             </Typography>
 
             <Button
-              loading={isPending}
-              onClick={handleClick}
+              loading={signupPending}
+              onClick={() => {
+                navigate("/");
+              }}
               variant="outlined"
             >
               {t("auth.signin")}

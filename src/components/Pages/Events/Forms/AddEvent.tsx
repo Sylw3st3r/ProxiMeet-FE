@@ -51,22 +51,29 @@ const INITIAL_VALUES = {
   },
 };
 
-export default function AddEventModal() {
+function useAddEvent() {
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const { mutate, isPending } = useMutation({
+  const { mutate: addEventMutate, isPending: addEventPending } = useMutation({
     mutationFn: addEvent,
-    onSuccess: async () => {
+    onSuccess: () => {
       client.invalidateQueries({ queryKey: ["user-events"] });
       client.invalidateQueries({ queryKey: ["events"] });
-      onClose();
+      navigate("/dashboard/user-events");
       enqueueSnackbar("Event was added successfuly!", { variant: "success" });
     },
     onError: () => {
       enqueueSnackbar("Couldn't add event!", { variant: "error" });
     },
   });
-  const { enqueueSnackbar } = useSnackbar();
+
+  return { addEventMutate, addEventPending };
+}
+
+export default function AddEventModal() {
+  const { addEventMutate, addEventPending } = useAddEvent();
+  const navigate = useNavigate();
 
   const onClose = async () => {
     return navigate("/dashboard/user-events");
@@ -75,12 +82,12 @@ export default function AddEventModal() {
   return (
     <EventEntityFormModal
       handleSubmit={(data) => {
-        mutate(data);
+        addEventMutate(data);
       }}
       INITIAL_VALUES={{ ...INITIAL_VALUES }}
       VALIDATOR={VALIDATOR}
       onClose={onClose}
-      mutationPending={isPending}
+      mutationPending={addEventPending}
       headerText="event.form.addHeader"
       submitButtonText="common.add"
     />

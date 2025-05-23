@@ -11,11 +11,12 @@ export default function LocationProvider({
     lat: number;
     lng: number;
   }>(null);
-  const { isLoggedIn } = useContext(AuthContext);
+  const { refreshToken } = useContext(AuthContext);
   const [requestingLocation, setRequestingLocation] = useState(false);
 
   useEffect(() => {
-    if (!isLoggedIn) {
+    // Check if user is authorized before asking for location
+    if (!refreshToken) {
       return;
     }
 
@@ -37,7 +38,7 @@ export default function LocationProvider({
         setRequestingLocation(false);
       },
     );
-  }, [isLoggedIn]);
+  }, [refreshToken]);
 
   return (
     <LocationContext.Provider value={{ location, requestingLocation }}>

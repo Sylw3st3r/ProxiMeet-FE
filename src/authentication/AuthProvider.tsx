@@ -6,42 +6,48 @@ import {
   requestNewAccessToken,
 } from "../vendor/auth-vendor";
 
+interface AuthState {
+  firstName: null | string;
+  lastName: null | string;
+  email: null | string;
+  refreshToken: null | string;
+  refreshTokenExpirationDate: null | string;
+}
+
 export const defaultAuthenticationContext = {
   firstName: null,
   lastName: null,
   email: null,
   refreshToken: null,
   refreshTokenExpirationDate: null,
-  isLoggedIn: false,
 };
 
-export default function AuthProvider({ children }: { children: ReactNode }) {
-  const [
-    {
-      firstName,
-      lastName,
-      email,
-      refreshToken,
-      isLoggedIn,
-      refreshTokenExpirationDate,
-    },
-    setContext,
-  ] = useState<{
-    firstName: null | string;
-    lastName: null | string;
-    email: null | string;
-    refreshToken: null | string;
-    refreshTokenExpirationDate: null | string;
-    isLoggedIn: boolean;
-  }>({ ...defaultAuthenticationContext });
+// Hook responsible for managing the main auth state
+function useAuthState() {
+  const [authState, setAuthState] = useState<AuthState>(
+    defaultAuthenticationContext,
+  );
   const [token, setToken] = useState<string | null>(null);
 
-  // Refs for timers
-  const logoutTimer = useRef<null | NodeJS.Timeout>(null);
-  const refreshInterval = useRef<null | NodeJS.Timer>(null);
+  return {
+    ...authState,
+    token,
+    setAuthState,
+    setToken,
+  };
+}
 
-  // Request for new access token
-  const { mutate: refreshAccessTokenRequest } = useMutation({
+// Hook responsible for automatic token refresh and logout
+export function useAuthTokenRefresh(
+  refreshToken: string | null,
+  refreshTokenExpirationDate: string | null,
+  setToken: (token: string | null) => void,
+  logOut: () => void,
+) {
+  const logoutTimer = useRef<null | NodeJS.Timeout>(null);
+  const refreshInterval = useRef<null | NodeJS.Timeout>(null);
+
+  const { mutate: refreshAccessToken } = useMutation({
     mutationFn: requestNewAccessToken,
     onSuccess: (newToken) => {
       setToken(newToken);
@@ -50,6 +56,73 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       logOut();
     },
   });
+
+  useEffect(() => {
+    if (!refreshTokenExpirationDate || !refreshToken) return;
+
+    const remainingTime =
+      new Date(refreshTokenExpirationDate).getTime() - Date.now();
+
+    logoutTimer.current = setTimeout(logOut, remainingTime);
+
+    refreshInterval.current = setInterval(
+      () => {
+        refreshAccessToken(refreshToken);
+      },
+      10 * 60 * 1000,
+    ); // every 10 minutes
+
+    return () => {
+      clearTimeout(logoutTimer.current!);
+      clearInterval(refreshInterval.current!);
+    };
+  }, [refreshTokenExpirationDate, refreshToken, refreshAccessToken, logOut]);
+}
+
+// Hook responsible for loading data from localStorage and checking token expiration on mount.
+export function useAuthInitializer(
+  setAuthState: (state: AuthState) => void,
+  setToken: (token: string) => void,
+) {
+  const { mutate: refreshTokenRequest } = useMutation({
+    mutationFn: requestNewAccessToken,
+    onSuccess: (newToken) => {
+      setToken(newToken);
+    },
+  });
+
+  const { mutate: removeTokenRequest } = useMutation({
+    mutationFn: removeRefreshToken,
+  });
+
+  useEffect(() => {
+    const data = localStorage.getItem("userData");
+    if (data) {
+      const parsedData = JSON.parse(data);
+      const expiration = new Date(parsedData.refreshTokenExpirationDate);
+      if (expiration.getTime() > Date.now()) {
+        setAuthState(parsedData);
+        refreshTokenRequest(parsedData.refreshToken);
+      } else {
+        localStorage.removeItem("userData");
+        removeTokenRequest(parsedData.refreshToken);
+        setAuthState(defaultAuthenticationContext);
+      }
+    }
+  }, [setAuthState, removeTokenRequest, refreshTokenRequest]);
+}
+
+export default function AuthProvider({ children }: { children: ReactNode }) {
+  const {
+    firstName,
+    lastName,
+    email,
+    refreshToken,
+    refreshTokenExpirationDate,
+    token,
+    setToken,
+    setAuthState,
+  } = useAuthState();
 
   const { mutate: logoutRequest } = useMutation({
     mutationFn: removeRefreshToken,
@@ -69,88 +142,37 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
       token: string;
       refreshToken: string;
     }) => {
-      // Set expiration date for refresh token (token expires in 7 days since being created)
-      const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-
+      const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       const newUserData = {
         firstName,
         lastName,
         email,
         refreshToken,
-        isLoggedIn: true,
         refreshTokenExpirationDate: expirationDate.toISOString(),
       };
-
-      setContext(newUserData);
+      setAuthState(newUserData);
       setToken(token);
       localStorage.setItem("userData", JSON.stringify(newUserData));
     },
-    [setContext, setToken],
+    [setAuthState, setToken],
   );
 
-  // Clear local memory / reset context / and send request to BE to get rid of old refresh token
   const logOut = useCallback(() => {
     localStorage.removeItem("userData");
-    if (refreshToken) {
-      logoutRequest(refreshToken);
-    }
+    if (refreshToken) logoutRequest(refreshToken);
     setToken(null);
-    setContext(defaultAuthenticationContext);
-  }, [refreshToken, logoutRequest]);
+    setAuthState(defaultAuthenticationContext);
+  }, [refreshToken, logoutRequest, setToken, setAuthState]);
 
-  useEffect(() => {
-    if (refreshTokenExpirationDate) {
-      const remainingTime =
-        new Date(refreshTokenExpirationDate).getTime() - Date.now();
-      // Schedule logout
-      logoutTimer.current = setTimeout(logOut, remainingTime);
-      // Requesting new access token every 10 minutes before the old one expires
-      refreshInterval.current = setInterval(
-        () => {
-          if (refreshToken) {
-            refreshAccessTokenRequest(refreshToken);
-          }
-        },
-        10 * 60 * 1000,
-      ); // 10 minutes
-
-      // Cleanup of timers/intervals
-      return () => {
-        if (logoutTimer.current) {
-          clearTimeout(logoutTimer.current);
-          logoutTimer.current = null;
-        }
-        if (refreshInterval.current) {
-          clearInterval(refreshInterval.current);
-          refreshInterval.current = null;
-        }
-      };
-    }
-  }, [
-    refreshTokenExpirationDate,
+  useAuthInitializer(setAuthState, setToken);
+  useAuthTokenRefresh(
     refreshToken,
-    refreshAccessTokenRequest,
+    refreshTokenExpirationDate,
+    setToken,
     logOut,
-  ]);
+  );
 
-  // On mount parse user data from local storage and check if still valid to use
-  useEffect(() => {
-    const data = localStorage.getItem("userData");
-    if (data) {
-      const parsedData = JSON.parse(data);
-      const expiration = new Date(parsedData.refreshTokenExpirationDate);
-      // Check if refresh token is still valid
-      if (expiration.getTime() > Date.now()) {
-        setContext(parsedData);
-        // Request new access token
-        refreshAccessTokenRequest(parsedData.refreshToken);
-      } else {
-        localStorage.removeItem("userData");
-        logoutRequest(parsedData.refreshToken);
-        setContext(defaultAuthenticationContext);
-      }
-    }
-  }, [refreshAccessTokenRequest, logoutRequest]);
+  const dataLoading = !!localStorage.getItem("userData") && !refreshToken;
 
   return (
     <AuthContext.Provider
@@ -161,15 +183,11 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         token,
         refreshToken,
         refreshTokenExpirationDate,
-        isLoggedIn,
         logIn,
         logOut,
-        dataLoading:
-          (!!localStorage.getItem("userData") && !isLoggedIn) ||
-          (isLoggedIn && !token),
       }}
     >
-      {children}
+      {dataLoading ? undefined : children}
     </AuthContext.Provider>
   );
 }

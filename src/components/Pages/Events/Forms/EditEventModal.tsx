@@ -71,9 +71,7 @@ function transformEventDataToForm(event?: Event) {
   };
 }
 
-export default function EditEventModal() {
-  let { id } = useParams();
-
+function useGetEvent(id?: string) {
   const validId = !(!id || isNaN(Number(id)) || Number(id) < 1);
 
   const { data: eventData, isPending: eventDataPending } = useQuery({
@@ -82,9 +80,19 @@ export default function EditEventModal() {
     enabled: validId,
   });
 
-  const { mutate, isPending: editPending } = useMutation({
+  return { eventData, eventDataPending, validId };
+}
+
+function useEditEvent() {
+  const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
+  const onClose = () => {
+    navigate("/dashboard/user-events");
+  };
+
+  const { mutate: editEventMutate, isPending: editPending } = useMutation({
     mutationFn: editEvent,
-    onSuccess: async () => {
+    onSuccess: () => {
       client.invalidateQueries({ queryKey: ["user-events"] });
       client.invalidateQueries({ queryKey: ["events"] });
       onClose();
@@ -95,7 +103,14 @@ export default function EditEventModal() {
     },
   });
 
-  const { enqueueSnackbar } = useSnackbar();
+  return { editEventMutate, editPending };
+}
+
+export default function EditEventModal() {
+  let { id } = useParams();
+  const { eventData, eventDataPending } = useGetEvent(id);
+  const { editEventMutate, editPending } = useEditEvent();
+
   const navigate = useNavigate();
   const onClose = () => {
     navigate("/dashboard/user-events");
@@ -104,7 +119,7 @@ export default function EditEventModal() {
   return (
     <EventEntityFormModal
       handleSubmit={(data) => {
-        mutate(data);
+        editEventMutate(data);
       }}
       INITIAL_VALUES={{ ...transformEventDataToForm(eventData) }}
       VALIDATOR={VALIDATOR}

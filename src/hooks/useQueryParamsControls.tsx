@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-// Hook resposnible for handling state of query params
+// Hook resposnsible for handling state of query params
 export default function useQueryParamControls(
   initialPage = 1,
   initialLimit = 20,
@@ -14,6 +14,7 @@ export default function useQueryParamControls(
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
+      setPage(1);
     }, 500);
 
     return () => {

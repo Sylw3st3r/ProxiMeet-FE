@@ -4,27 +4,35 @@ import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router";
 import { verifyUser } from "../../../vendor/auth-vendor";
 
-export default function VerifyAccount() {
+function useVerifyUser() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
-  let params = useParams();
 
-  const { mutate } = useMutation({
+  const { mutate: verifyUserMutate } = useMutation({
     mutationFn: verifyUser,
     onSuccess: () => {
       enqueueSnackbar("Account activated!", { variant: "success" });
       navigate("/");
     },
     onError: () => {
-      enqueueSnackbar("Couldn't add event!", { variant: "error" });
+      enqueueSnackbar("Something went wrong! Couldn't activate account!", {
+        variant: "error",
+      });
     },
   });
 
+  return { verifyUserMutate };
+}
+
+export default function VerifyAccount() {
+  const { verifyUserMutate } = useVerifyUser();
+  let { token } = useParams();
+
   useEffect(() => {
-    if (params.token) {
-      mutate(params.token);
+    if (token) {
+      verifyUserMutate(token);
     }
-  }, [mutate, params.token]);
+  }, [verifyUserMutate, token]);
 
   return <></>;
 }

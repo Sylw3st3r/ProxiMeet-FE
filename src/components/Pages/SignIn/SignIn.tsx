@@ -34,23 +34,24 @@ const INITIAL_VALUES = {
   password: "",
 };
 
-export default function SignIn() {
+function useSignIn() {
   const { logIn } = useContext(AuthContext);
-  const { t } = useTranslation();
-  const theme = useTheme();
 
-  const { mutate, isPending } = useMutation({
+  const { mutate: signInMutate, isPending: signInPending } = useMutation({
     mutationFn: signin,
     onSuccess: (userData) => {
       logIn(userData);
     },
   });
 
-  const navigate = useNavigate();
+  return { signInMutate, signInPending };
+}
 
-  function handleClick() {
-    navigate("/signup");
-  }
+export default function SignIn() {
+  const { signInMutate, signInPending } = useSignIn();
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -64,7 +65,7 @@ export default function SignIn() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(data) => mutate(data)}
+        onSubmit={(data) => signInMutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -92,7 +93,7 @@ export default function SignIn() {
               <FormInput variant="standard" key={index} {...definition} />
             ))}
 
-            <Button loading={isPending} type="submit" variant="contained">
+            <Button loading={signInPending} type="submit" variant="contained">
               {t("auth.signin")}
             </Button>
             <Typography
@@ -104,8 +105,10 @@ export default function SignIn() {
             </Typography>
 
             <Button
-              loading={isPending}
-              onClick={handleClick}
+              loading={signInPending}
+              onClick={() => {
+                navigate("/signup");
+              }}
               variant="outlined"
             >
               {t("auth.signup")}

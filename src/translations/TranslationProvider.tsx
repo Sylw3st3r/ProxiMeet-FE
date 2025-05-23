@@ -13,13 +13,11 @@ export default function TranslationProvider({
 
   const changeLanguage = useCallback(
     (newLng: "pl" | "en") => {
-      if (newLng !== lng) {
-        localStorage.setItem("language", newLng);
-        i18n.changeLanguage(newLng);
-        setLng(newLng);
-      }
+      localStorage.setItem("language", newLng);
+      i18n.changeLanguage(newLng);
+      setLng(newLng);
     },
-    [setLng, lng, i18n],
+    [setLng, i18n],
   );
 
   useEffect(() => {

@@ -18,25 +18,32 @@ const INITIAL_VALUES = {
   email: "",
 };
 
-export default function RequestPasswordReset() {
-  const { t } = useTranslation();
-  const theme = useTheme();
+function useRequestPasswordResetToken() {
   const navigate = useNavigate();
   const { enqueueSnackbar } = useSnackbar();
 
-  const { mutate, isPending } = useMutation({
+  const {
+    mutate: requestPasswordResetTokenMutate,
+    isPending: requestPasswordResetTokenPending,
+  } = useMutation({
     mutationFn: requestPasswordResetToken,
     onSuccess: () => {
       enqueueSnackbar("Check your inbox for password reset", {
         variant: "success",
       });
-      handleClick();
+      navigate("/");
     },
   });
 
-  const handleClick = () => {
-    navigate("/");
-  };
+  return { requestPasswordResetTokenMutate, requestPasswordResetTokenPending };
+}
+
+export default function RequestPasswordReset() {
+  const { requestPasswordResetTokenMutate, requestPasswordResetTokenPending } =
+    useRequestPasswordResetToken();
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -50,7 +57,7 @@ export default function RequestPasswordReset() {
     >
       <Formik
         initialValues={{ ...INITIAL_VALUES }}
-        onSubmit={(data) => mutate(data)}
+        onSubmit={(data) => requestPasswordResetTokenMutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -84,7 +91,11 @@ export default function RequestPasswordReset() {
               }}
             />
 
-            <Button loading={isPending} type="submit" variant="contained">
+            <Button
+              loading={requestPasswordResetTokenPending}
+              type="submit"
+              variant="contained"
+            >
               {t("auth.resetPassword")}
             </Button>
             <Typography
@@ -96,8 +107,10 @@ export default function RequestPasswordReset() {
             </Typography>
 
             <Button
-              loading={isPending}
-              onClick={handleClick}
+              loading={requestPasswordResetTokenPending}
+              onClick={() => {
+                navigate("/");
+              }}
               variant="outlined"
             >
               {t("auth.signin")}

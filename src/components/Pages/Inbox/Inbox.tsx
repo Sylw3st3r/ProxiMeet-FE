@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Typography, Box, LinearProgress } from "@mui/material";
+import { Typography, Box } from "@mui/material";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   getAllNotifications,
@@ -45,12 +45,12 @@ function useSelectedNotifications(data?: PaginatedNotifications) {
 
 // Hook responsible for handling fetching of notifications
 function useInboxNotifications(search: string, page: number, limit: number) {
-  const { data, isPending } = useQuery({
+  const { data, isPending: notificationsPending } = useQuery({
     queryKey: ["notifications", { search, page, limit }],
     queryFn: ({ signal }) => getAllNotifications(signal, search, page, limit),
   });
 
-  return { data, isPending };
+  return { data, notificationsPending };
 }
 
 // Hook responsible for handling marking all notifications as seen
@@ -68,20 +68,24 @@ function useMarkAllNotificationsAsSeen() {
     return markAllAsSeen();
   };
 
-  const { mutate: markAllAsSeenMutation } = useMutation({
-    mutationFn: markAllAsSeenHandler,
-    onSuccess: () => {
-      client.invalidateQueries({ queryKey: ["notifications"] });
-      client.invalidateQueries({ queryKey: ["unseen-notifications-count"] });
-    },
-  });
+  const { mutate: markAllAsSeenMutation, isPending: markAllPending } =
+    useMutation({
+      mutationFn: markAllAsSeenHandler,
+      onSuccess: () => {
+        client.invalidateQueries({ queryKey: ["notifications"] });
+        client.invalidateQueries({ queryKey: ["unseen-notifications-count"] });
+      },
+    });
 
-  return { markAllAsSeenMutation, ConfirmDialogComponent };
+  return { markAllAsSeenMutation, ConfirmDialogComponent, markAllPending };
 }
 
 // Hook responsible for handling marking all selected notifications as seen
 function useMarkSelectedNotificationsAsSeen() {
-  const { mutate: markSelectedAsSeenMutation } = useMutation({
+  const {
+    mutate: markSelectedAsSeenMutation,
+    isPending: markSelectedAsSeenPending,
+  } = useMutation({
     mutationFn: markSelectedAsSeen,
     onSuccess: () => {
       client.invalidateQueries({ queryKey: ["notifications"] });
@@ -89,12 +93,15 @@ function useMarkSelectedNotificationsAsSeen() {
     },
   });
 
-  return { markSelectedAsSeenMutation };
+  return { markSelectedAsSeenMutation, markSelectedAsSeenPending };
 }
 
 // Hook responsible for handling marking all selected notifications as unseen
 function useMarkSelectedNotificationsAsUnseen() {
-  const { mutate: markSelectedAsUnseenMutation } = useMutation({
+  const {
+    mutate: markSelectedAsUnseenMutation,
+    isPending: markSelectedAsUnseenPending,
+  } = useMutation({
     mutationFn: markSelectedAsUnseen,
     onSuccess: () => {
       client.invalidateQueries({ queryKey: ["notifications"] });
@@ -102,15 +109,15 @@ function useMarkSelectedNotificationsAsUnseen() {
     },
   });
 
-  return { markSelectedAsUnseenMutation };
+  return { markSelectedAsUnseenMutation, markSelectedAsUnseenPending };
 }
 
-// Hook responsible for data fetchng, mutations and state manipulation of Inbox component
+// Hook responsible for data fetching, mutations and state manipulation of Inbox component
 function useInboxControls() {
   // Handles query params
   const params = useQueryParamControls();
   // Handles notification data requests
-  const { data, isPending } = useInboxNotifications(
+  const { data, notificationsPending } = useInboxNotifications(
     params.debouncedSearch,
     params.page,
     params.limit,
@@ -119,12 +126,13 @@ function useInboxControls() {
   const { toggleSelect, isSelected, selectedIds } =
     useSelectedNotifications(data);
   // Handles request for marking all notifications as seen
-  const { markAllAsSeenMutation, ConfirmDialogComponent } =
+  const { markAllAsSeenMutation, ConfirmDialogComponent, markAllPending } =
     useMarkAllNotificationsAsSeen();
   // Handles request for marking selected notifications as seen
-  const { markSelectedAsSeenMutation } = useMarkSelectedNotificationsAsSeen();
+  const { markSelectedAsSeenMutation, markSelectedAsSeenPending } =
+    useMarkSelectedNotificationsAsSeen();
   // Handles request for marking selected notifications as unseen
-  const { markSelectedAsUnseenMutation } =
+  const { markSelectedAsUnseenMutation, markSelectedAsUnseenPending } =
     useMarkSelectedNotificationsAsUnseen();
 
   const noNotifications = !(
@@ -136,7 +144,16 @@ function useInboxControls() {
   const InboxControls = (
     <>
       {ConfirmDialogComponent}
-      <CommonToolabr {...params} totalPages={data?.totalPages}>
+      <CommonToolabr
+        isLoading={
+          notificationsPending ||
+          markAllPending ||
+          markSelectedAsSeenPending ||
+          markSelectedAsUnseenPending
+        }
+        {...params}
+        totalPages={data?.totalPages}
+      >
         <Tooltip title="Mark all as seen">
           <span>
             <IconButton
@@ -178,7 +195,6 @@ function useInboxControls() {
 
   return {
     data,
-    isPending,
     markAllAsSeenMutation,
     InboxControls,
     toggleSelect,
@@ -187,8 +203,7 @@ function useInboxControls() {
 }
 
 export default function Inbox() {
-  const { data, isPending, InboxControls, toggleSelect, isSelected } =
-    useInboxControls();
+  const { data, InboxControls, toggleSelect, isSelected } = useInboxControls();
 
   const noData = data === undefined || data.notifications.length === 0;
 
@@ -196,7 +211,6 @@ export default function Inbox() {
     <>
       {InboxControls}
       <Box sx={{ maxWidth: 600, margin: "auto", mt: 4 }}>
-        {isPending && <LinearProgress />}
         {noData ? (
           <Typography
             variant="body1"

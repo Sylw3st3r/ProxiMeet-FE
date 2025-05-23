@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   ToggleButton,
@@ -6,7 +6,6 @@ import {
   Typography,
   IconButton,
   useTheme,
-  LinearProgress,
 } from "@mui/material";
 import {
   ChevronLeft,
@@ -33,32 +32,25 @@ import { useQuery } from "@tanstack/react-query";
 import { getScheduleEvents } from "../../../vendor/events-vendor";
 import { useTranslation } from "react-i18next";
 import BlankToolbar from "../../Toolbar/BlankToolbar";
+import { Event } from "../../../model/event";
 
 type mode = "day" | "week" | "month";
 
-const Schedule = () => {
-  const [mode, setMode] = useState<mode>("day"); // day | week | month
-  const [currentDate, setCurrentDate] = useState(new Date());
-
-  useEffect(() => {
-    console.log(currentDate);
-  }, [currentDate]);
-
-  const { isPending, data: events } = useQuery({
+function useScheduleData(currentDate: Date, mode: mode) {
+  const { data: scheduleData, isPending: schedulePending } = useQuery({
     queryKey: ["schedule", { currentDate, mode }],
     queryFn: ({ signal }) => getScheduleEvents(signal, currentDate, mode),
   });
+  return { scheduleData, schedulePending };
+}
 
-  const theme = useTheme();
-  const { t } = useTranslation();
-
-  const handleModeChange = (_: unknown, newMode: mode) => {
-    setMode(newMode);
-  };
+function useScheduleState() {
+  const [mode, setMode] = useState<mode>("month"); // day | week | month
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const goToToday = () => setCurrentDate(new Date());
 
-  const goNext = () => {
+  const goToNext = () => {
     setCurrentDate((prev) => {
       if (mode === "day") return addDays(prev, 1);
       if (mode === "week") return addWeeks(prev, 1);
@@ -66,13 +58,57 @@ const Schedule = () => {
     });
   };
 
-  const goPrevious = () => {
+  const goToPrevious = () => {
     setCurrentDate((prev) => {
       if (mode === "day") return subDays(prev, 1);
       if (mode === "week") return subWeeks(prev, 1);
       return subMonths(prev, 1);
     });
   };
+  return { mode, setMode, currentDate, goToNext, goToPrevious, goToToday };
+}
+
+function useScheduleControler() {
+  const { currentDate, mode, setMode, goToPrevious, goToToday, goToNext } =
+    useScheduleState();
+  const { scheduleData, schedulePending } = useScheduleData(currentDate, mode);
+  const { t } = useTranslation();
+
+  const ScheduleToolbarComponent = (
+    <BlankToolbar isLoading={schedulePending}>
+      <ToggleButtonGroup
+        value={mode}
+        exclusive
+        onChange={(_, mode) => {
+          setMode(mode);
+        }}
+      >
+        <ToggleButton value="day">{t("schedule.day")}</ToggleButton>
+        <ToggleButton value="week">{t("schedule.week")}</ToggleButton>
+        <ToggleButton value="month">{t("schedule.month")}</ToggleButton>
+      </ToggleButtonGroup>
+      <Box>
+        <IconButton onClick={goToPrevious}>
+          <ChevronLeft />
+        </IconButton>
+        <IconButton onClick={goToToday}>
+          <TodayIcon />
+        </IconButton>
+        <IconButton onClick={goToNext}>
+          <ChevronRight />
+        </IconButton>
+      </Box>
+    </BlankToolbar>
+  );
+
+  return { scheduleData, mode, currentDate, ScheduleToolbarComponent };
+}
+
+const Schedule = () => {
+  const { scheduleData, mode, currentDate, ScheduleToolbarComponent } =
+    useScheduleControler();
+
+  const theme = useTheme();
 
   const renderHeader = () => {
     let label;
@@ -81,7 +117,6 @@ const Schedule = () => {
     } else if (mode === "week") {
       const start = startOfWeek(currentDate);
       const end = endOfWeek(currentDate);
-      console.log(start, end);
       label = `${format(start, "MMM d")} – ${format(end, "MMM d")}`;
     } else {
       label = format(currentDate, "MMMM yyyy");
@@ -93,61 +128,24 @@ const Schedule = () => {
     );
   };
 
-  const renderBody = (
-    scheduleEvents: {
-      start: Date;
-      end: Date;
-      name: string;
-      id: number;
-    }[],
-  ) => {
-    switch (mode) {
-      case "day":
-        return <DayView events={scheduleEvents} date={currentDate} />;
-      case "week":
-        return <WeekView events={scheduleEvents} date={currentDate} />;
-      case "month":
-        return <MonthView events={scheduleEvents} date={currentDate} />;
-      default:
-        return null;
-    }
-  };
+  let ScheduleBody;
+
+  if (mode === "day") {
+    ScheduleBody = DayView;
+  } else if (mode === "week") {
+    ScheduleBody = WeekView;
+  } else {
+    ScheduleBody = MonthView;
+  }
 
   return (
     <Box position={"relative"}>
-      <BlankToolbar>
-        <ToggleButtonGroup value={mode} exclusive onChange={handleModeChange}>
-          <ToggleButton value="day">{t("schedule.day")}</ToggleButton>
-          <ToggleButton value="week">{t("schedule.week")}</ToggleButton>
-          <ToggleButton value="month">{t("schedule.month")}</ToggleButton>
-        </ToggleButtonGroup>
-        <Box>
-          <IconButton onClick={goPrevious}>
-            <ChevronLeft />
-          </IconButton>
-          <IconButton onClick={goToToday}>
-            <TodayIcon />
-          </IconButton>
-          <IconButton onClick={goNext}>
-            <ChevronRight />
-          </IconButton>
-        </Box>
-      </BlankToolbar>
-
+      {ScheduleToolbarComponent}
       <Box p={2}>
         <Box mt={2} mb={1}>
           {renderHeader()}
         </Box>
-        {isPending && <LinearProgress></LinearProgress>}
-        {renderBody(
-          (events || []).map((event) => {
-            return {
-              ...event,
-              start: new Date(event.start),
-              end: new Date(event.end),
-            };
-          }),
-        )}
+        <ScheduleBody events={scheduleData || []} date={currentDate} />
       </Box>
     </Box>
   );
@@ -155,20 +153,22 @@ const Schedule = () => {
 
 const hourSectionHeight = 50;
 
-const DayView = ({
-  date,
-  events,
-}: {
-  date: Date;
-  events: { start: Date; end: Date; name: string; id: number }[];
-}) => {
+const DayView = ({ date, events }: { date: Date; events: Event[] }) => {
   const theme = useTheme();
   const hours = Array.from({ length: 24 }, (_, i) => i);
 
   const dayStart = startOfDay(date);
   const dayEnd = endOfDay(date);
 
-  const dayEvents = events.filter((event) => {
+  const transformedEvents = events.map((event) => {
+    return {
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+    };
+  });
+
+  const dayEvents = transformedEvents.filter((event) => {
     return event.end > dayStart && event.start < dayEnd;
   });
 
@@ -239,16 +239,18 @@ const TimeIndicator = () => {
   );
 };
 
-const WeekView = ({
-  date,
-  events,
-}: {
-  date: Date;
-  events: { start: Date; end: Date; name: string; id: number }[];
-}) => {
+const WeekView = ({ date, events }: { date: Date; events: Event[] }) => {
   const theme = useTheme();
   const start = startOfWeek(date);
   const days = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+
+  const transformedEvents = events.map((event) => {
+    return {
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+    };
+  });
 
   return (
     <Box
@@ -264,7 +266,7 @@ const WeekView = ({
         const dayStart = new Date(day.setHours(0, 0, 0, 0));
         const dayEnd = new Date(day.setHours(23, 59, 59, 999));
 
-        const dayEvents = events.filter((item) => {
+        const dayEvents = transformedEvents.filter((item) => {
           return item.end > dayStart && item.start < dayEnd;
         });
 
@@ -302,18 +304,21 @@ const WeekView = ({
   );
 };
 
-const MonthView = ({
-  date,
-  events,
-}: {
-  date: Date;
-  events: { start: Date; end: Date; name: string; id: number }[];
-}) => {
+const MonthView = ({ date, events }: { date: Date; events: Event[] }) => {
   const theme = useTheme();
   const start = startOfMonth(date);
   const end = endOfMonth(date);
   const days = [];
   let current = start;
+
+  const transformedEvents = events.map((event) => {
+    return {
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+    };
+  });
+
   while (current <= end) {
     days.push(current);
     current = addDays(current, 1);
@@ -331,7 +336,7 @@ const MonthView = ({
       gap={0.5}
     >
       {days.map((day) => {
-        const dayEvents = events.filter(
+        const dayEvents = transformedEvents.filter(
           (event) => event.start.toDateString() === day.toDateString(),
         );
 

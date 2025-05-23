@@ -12,20 +12,10 @@ import {
 import { useField } from "formik";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer } from "react-leaflet";
 
-import { Icon } from "leaflet";
-
-import marker from "../../assets/red-pin.png";
 import { LocationContext } from "../../location/location-context";
-
-const myIcon = new Icon({
-  iconUrl: marker,
-  iconRetinaUrl: marker,
-  iconSize: [25, 40],
-  iconAnchor: [12.5, 40],
-  popupAnchor: [0, -40],
-});
+import { LocationMarker } from "../Marker/LocationMarker";
 
 export async function reverseGeocodeOSM(lat: number, lon: number) {
   const response = await fetch(
@@ -70,19 +60,6 @@ export default function LocationPicker({
   useEffect(() => {
     handleSaveOfPickedLocation();
   }, [handleSaveOfPickedLocation]);
-
-  // Component that shows a marker in selected location
-  const LocationMarker = () => {
-    useMapEvents({
-      click(e) {
-        if (!disabled) {
-          setPickedLocation(e.latlng as any);
-        }
-      },
-    });
-
-    return <Marker icon={myIcon} position={pickedLocation} />;
-  };
 
   const showError = Boolean(meta.error && meta.touched);
 
@@ -171,7 +148,10 @@ export default function LocationPicker({
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
               />
-              <LocationMarker />
+              <LocationMarker
+                pickedLocation={pickedLocation}
+                setPickedLocation={setPickedLocation}
+              />
             </MapContainer>
           </Box>
           <Box

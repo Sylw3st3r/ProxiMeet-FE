@@ -1,12 +1,9 @@
-import { useState } from "react";
 import {
-  Box,
-  Button,
-  LinearProgress,
   Grid,
   ButtonGroup,
   IconButton,
   Tooltip,
+  Typography,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -20,20 +17,24 @@ import {
 } from "../../../vendor/events-vendor";
 import { useConfirm } from "../../../hooks/useConfirm";
 import { Event } from "../../../model/event";
-import { Add } from "@mui/icons-material";
+import { AddBoxSharp } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
 import CommonToolabr from "../../Toolbar/CommonToolbar";
+import useQueryParamControls from "../../../hooks/useQueryParamsControls";
 
-const UserEvents = () => {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
-  const [search, setSearch] = useState("");
+function useUserEventsData(search: string, page: number, limit: number) {
+  const { data, isPending: userEventsPending } = useQuery({
+    queryKey: ["user-events", { search, page, limit }],
+    queryFn: ({ signal }) => getAllUserData(signal, search, page, limit),
+  });
+
+  return { data, userEventsPending };
+}
+
+function useDeleteEventMutation() {
   const { confirm, ConfirmDialogComponent } = useConfirm();
-  const { t } = useTranslation();
 
-  // Check if there are ovelpaing events
-  // If yes then confirm with user that we want to proceed
-  // If no then proceed automaticly
+  // Confirm with user that they are sure about this action
   const deleteEventRequestHandler = async (event: Event) => {
     const userConfirmed = await confirm({
       title: `Are you sure you want to delete ${event.name}?`,
@@ -46,7 +47,7 @@ const UserEvents = () => {
     return deleteEventRequest(event.id);
   };
 
-  const { mutate: deleteEventMutation, isPending: deletionPending } =
+  const { mutate: deleteEventMutation, isPending: deleteEventPending } =
     useMutation({
       mutationFn: deleteEventRequestHandler,
       onSuccess: async () => {
@@ -55,42 +56,67 @@ const UserEvents = () => {
       },
     });
 
-  const { data, isPending } = useQuery({
-    queryKey: ["user-events", { search, page, limit }],
-    queryFn: ({ signal }) => getAllUserData(signal, search, page, limit),
-  });
+  return { ConfirmDialogComponent, deleteEventMutation, deleteEventPending };
+}
+
+// Hook responsible for data fetching, mutations and state manipulation of UserEvents component
+function useUserEventsControler() {
+  // Handles query params
+  const params = useQueryParamControls();
+  // Handles events data requests
+  const { data, userEventsPending } = useUserEventsData(
+    params.debouncedSearch,
+    params.page,
+    params.limit,
+  );
+  // Handles request for deletion of event
+  const { deleteEventMutation, ConfirmDialogComponent, deleteEventPending } =
+    useDeleteEventMutation();
 
   const navigate = useNavigate();
 
-  return (
-    <Box>
+  // UserEvents toolbar + Confirmation popup
+  const UserEventsControls = (
+    <>
       {ConfirmDialogComponent}
       <CommonToolabr
-        {...{
-          search,
-          setSearch,
-          page,
-          setPage,
-          limit,
-          setLimit,
-          totalPages: data?.totalPages,
-        }}
+        isLoading={userEventsPending || deleteEventPending}
+        {...params}
+        totalPages={data?.totalPages}
       >
-        <Button
-          startIcon={<Add />}
-          disabled={deletionPending}
-          variant={"contained"}
-          onClick={() => {
-            navigate("add");
-          }}
-        >
-          {t("common.add")}
-        </Button>
-        <Box flex={1} />
+        <Tooltip title="Add event">
+          <span>
+            <IconButton size="small" onClick={() => navigate("add")}>
+              <AddBoxSharp />
+            </IconButton>
+          </span>
+        </Tooltip>
       </CommonToolabr>
-      {isPending ? (
-        <LinearProgress color="primary" />
-      ) : data ? (
+    </>
+  );
+
+  return { data, deleteEventMutation, UserEventsControls };
+}
+
+const UserEvents = () => {
+  const { data, deleteEventMutation, UserEventsControls } =
+    useUserEventsControler();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const noData = data === undefined || data.events.length === 0;
+
+  return (
+    <>
+      {UserEventsControls}
+      {noData ? (
+        <Typography
+          variant="body1"
+          sx={{ textAlign: "center", color: "text.secondary", mt: 4 }}
+        >
+          No events to show.
+        </Typography>
+      ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {data.events.map((event, index: number) => (
             <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
@@ -98,7 +124,6 @@ const UserEvents = () => {
                 <ButtonGroup>
                   <Tooltip title={t("common.edit")}>
                     <IconButton
-                      disabled={deletionPending}
                       onClick={() => {
                         navigate(`edit/${event.id}`);
                       }}
@@ -108,7 +133,6 @@ const UserEvents = () => {
                   </Tooltip>
                   <Tooltip title={t("common.delete")}>
                     <IconButton
-                      loading={deletionPending}
                       onClick={() => {
                         deleteEventMutation(event);
                       }}
@@ -121,11 +145,9 @@ const UserEvents = () => {
             </Grid>
           ))}
         </Grid>
-      ) : (
-        <Box />
       )}
       <Outlet></Outlet>
-    </Box>
+    </>
   );
 };
 

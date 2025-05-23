@@ -32,85 +32,80 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const createRouter = (token: string | null) =>
-  createBrowserRouter([
-    {
-      path: "/dashboard",
-      Component: MainLayout,
-      children: [
-        { index: true, Component: Home },
-        {
-          path: "events",
-          Component: AllEvents,
-        },
-        {
-          path: "user-events",
-          Component: UserEvents,
-          children: [
-            {
-              path: "add",
-              Component: AddEventModal,
-            },
-            {
-              path: "edit/:id",
-              Component: EditEventModal,
-            },
-          ],
-        },
-        {
-          path: "near-you",
-          Component: NearYou,
-        },
-        {
-          path: "schedule",
-          Component: Schedule,
-        },
-        {
-          path: "inbox",
-          Component: Inbox,
-        },
-      ],
-    },
-    {
-      path: "/",
-      Component: UnauthorizedLayout,
-      children: [
-        { index: true, Component: SignIn },
-        {
-          path: "/signup",
-          Component: SignUp,
-        },
-        {
-          path: "/verify/:token",
-          Component: VerifyAccount,
-        },
-        {
-          path: "/password-reset",
-          Component: RequestPasswordReset,
-        },
-        {
-          path: "/password-reset/:token",
-          Component: PasswordReset,
-        },
-      ],
-    },
-    {
-      path: "/*",
-      Component: PageNotFound,
-    },
-  ]);
+const appRouter = createBrowserRouter([
+  {
+    path: "/dashboard",
+    Component: MainLayout,
+    children: [
+      { index: true, Component: Home },
+      {
+        path: "events",
+        Component: AllEvents,
+      },
+      {
+        path: "user-events",
+        Component: UserEvents,
+        children: [
+          {
+            path: "add",
+            Component: AddEventModal,
+          },
+          {
+            path: "edit/:id",
+            Component: EditEventModal,
+          },
+        ],
+      },
+      {
+        path: "near-you",
+        Component: NearYou,
+      },
+      {
+        path: "schedule",
+        Component: Schedule,
+      },
+      {
+        path: "inbox",
+        Component: Inbox,
+      },
+    ],
+  },
+  {
+    path: "/",
+    Component: UnauthorizedLayout,
+    children: [
+      { index: true, Component: SignIn },
+      {
+        path: "/signup",
+        Component: SignUp,
+      },
+      {
+        path: "/verify/:token",
+        Component: VerifyAccount,
+      },
+      {
+        path: "/password-reset",
+        Component: RequestPasswordReset,
+      },
+      {
+        path: "/password-reset/:token",
+        Component: PasswordReset,
+      },
+    ],
+  },
+  {
+    path: "/*",
+    Component: PageNotFound,
+  },
+]);
 
 export default function App() {
-  const { token, dataLoading, isLoggedIn } = useContext(AuthContext);
-  const { interceptorReady } = useAxiosInterceptor(token);
+  const { refreshToken } = useContext(AuthContext);
+  const { interceptorReady } = useAxiosInterceptor();
 
-  if (dataLoading) {
+  if (refreshToken && !interceptorReady) {
     return null;
   }
 
-  if (isLoggedIn && !interceptorReady) {
-    return null;
-  }
-
-  return <RouterProvider router={createRouter(token)} />;
+  return <RouterProvider router={appRouter} />;
 }

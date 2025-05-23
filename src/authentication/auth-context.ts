@@ -1,8 +1,6 @@
 import { createContext } from "react";
 
 export const AuthContext = createContext<{
-  dataLoading: boolean;
-  isLoggedIn: boolean;
   firstName: null | string;
   lastName: null | string;
   email: null | string;
@@ -18,8 +16,6 @@ export const AuthContext = createContext<{
   }) => void;
   logOut: () => void;
 }>({
-  dataLoading: false,
-  isLoggedIn: false,
   firstName: null,
   lastName: null,
   email: null,

@@ -21,27 +21,26 @@ const VALIDATOR = Yup.object({
     ),
 });
 
+function useResetPassword() {
+  const navigate = useNavigate();
+
+  const { mutate: resetPasswordMutate, isPending: passwordResetPending } =
+    useMutation({
+      mutationFn: resetPassword,
+      onSuccess: () => {
+        navigate("/");
+      },
+    });
+
+  return { resetPasswordMutate, passwordResetPending };
+}
+
 export default function PasswordReset() {
+  const { resetPasswordMutate, passwordResetPending } = useResetPassword();
   const { t } = useTranslation();
   const theme = useTheme();
   const navigate = useNavigate();
-
-  let params = useParams();
-
-  const { mutate, isPending } = useMutation({
-    mutationFn: resetPassword,
-    onSuccess: () => {
-      handleClick();
-    },
-  });
-
-  const handleClick = () => {
-    navigate("/");
-  };
-
-  if (!params.token) {
-    return <></>;
-  }
+  const params = useParams();
 
   return (
     <Box
@@ -55,11 +54,11 @@ export default function PasswordReset() {
     >
       <Formik
         initialValues={{
-          token: params.token,
+          token: params.token || "",
           password: "",
           matchingPassword: "",
         }}
-        onSubmit={(data) => mutate(data)}
+        onSubmit={(data) => resetPasswordMutate(data)}
         validationSchema={VALIDATOR}
       >
         <Form>
@@ -103,7 +102,11 @@ export default function PasswordReset() {
               }}
             />
 
-            <Button loading={isPending} type="submit" variant="contained">
+            <Button
+              loading={passwordResetPending}
+              type="submit"
+              variant="contained"
+            >
               {t("auth.resetPassword")}
             </Button>
 
@@ -116,8 +119,10 @@ export default function PasswordReset() {
             </Typography>
 
             <Button
-              loading={isPending}
-              onClick={handleClick}
+              loading={passwordResetPending}
+              onClick={() => {
+                navigate("/");
+              }}
               variant="outlined"
             >
               {t("auth.signin")}

@@ -81,12 +81,7 @@ const navItems = (unseenNotificationsCount: number | undefined) => [
   },
 ];
 
-export default function SidebarNav() {
-  const { logOut } = useContext(AuthContext);
-  const theme = useTheme();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const { t } = useTranslation();
-
+function useInboxPolling() {
   // Polling every 30s to check if we have something new in inbox
   // At the beggining used websockets to inform user about new notification
   // Decided that it was an overkill
@@ -96,6 +91,15 @@ export default function SidebarNav() {
     refetchInterval: 30000,
   });
 
+  return { data };
+}
+
+export default function SidebarNav() {
+  const { data } = useInboxPolling();
+  const { logOut } = useContext(AuthContext);
+  const theme = useTheme();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { t } = useTranslation();
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
