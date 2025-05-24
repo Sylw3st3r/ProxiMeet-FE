@@ -116,7 +116,11 @@
       }
     },
     "attend": "Attend",
-    "resign": "Resign"
+    "resign": "Resign",
+    "overlap_confirm_title": "Overlap detected. Do you want to proceed?",
+    "overlap_confirm_message": "Detected overlap with: {{events}}",
+    "delete_confirm_title": "Delete Event Confirmation",
+    "delete_confirm_message": "Are you sure you want to delete {{event}}?"
   },
   "sidenav": {
     "dashboard": "Dashboard",

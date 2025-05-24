@@ -19,7 +19,7 @@ import { useConfirm } from "../../../hooks/useConfirm";
 import { Event } from "../../../model/event";
 import { AddBoxSharp } from "@mui/icons-material";
 import { useTranslation } from "react-i18next";
-import CommonToolabr from "../../Toolbar/CommonToolbar";
+import CommonToolbar from "../../Toolbar/CommonToolbar";
 import useQueryParamControls from "../../../hooks/useQueryParamsControls";
 
 function useUserEventsData(search: string, page: number, limit: number) {
@@ -33,12 +33,15 @@ function useUserEventsData(search: string, page: number, limit: number) {
 
 function useDeleteEventMutation() {
   const { confirm, ConfirmDialogComponent } = useConfirm();
+  const { t } = useTranslation();
 
   // Confirm with user that they are sure about this action
   const deleteEventRequestHandler = async (event: Event) => {
     const userConfirmed = await confirm({
-      title: `Are you sure you want to delete ${event.name}?`,
-      message: "Event will be delited permanently",
+      title: t("event.delete_confirm_title"),
+      message: t("event.delete_confirm_message", {
+        event: event.name,
+      }),
     });
     if (!userConfirmed) {
       return;
@@ -60,7 +63,7 @@ function useDeleteEventMutation() {
 }
 
 // Hook responsible for data fetching, mutations and state manipulation of UserEvents component
-function useUserEventsControler() {
+function useUserEventsController() {
   // Handles query params
   const params = useQueryParamControls();
   // Handles events data requests
@@ -79,7 +82,7 @@ function useUserEventsControler() {
   const UserEventsControls = (
     <>
       {ConfirmDialogComponent}
-      <CommonToolabr
+      <CommonToolbar
         isLoading={userEventsPending || deleteEventPending}
         {...params}
         totalPages={data?.totalPages}
@@ -91,7 +94,7 @@ function useUserEventsControler() {
             </IconButton>
           </span>
         </Tooltip>
-      </CommonToolabr>
+      </CommonToolbar>
     </>
   );
 
@@ -100,7 +103,7 @@ function useUserEventsControler() {
 
 const UserEvents = () => {
   const { data, deleteEventMutation, UserEventsControls } =
-    useUserEventsControler();
+    useUserEventsController();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -119,8 +122,8 @@ const UserEvents = () => {
       ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {data.events.map((event, index: number) => (
-            <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
-              <EventCard key={event.id} event={event}>
+            <Grid key={event.id} style={{ flexGrow: 1, maxWidth: 220 }}>
+              <EventCard event={event}>
                 <ButtonGroup>
                   <Tooltip title={t("common.edit")}>
                     <IconButton

@@ -18,7 +18,7 @@ import {
 } from "../../../vendor/events-vendor";
 import { client } from "../../..";
 import { useTranslation } from "react-i18next";
-import CommonToolabr from "../../Toolbar/CommonToolbar";
+import CommonToolbar from "../../Toolbar/CommonToolbar";
 import useQueryParamControls from "../../../hooks/useQueryParamsControls";
 
 function useAllEventsData(search: string, page: number, limit: number) {
@@ -33,6 +33,7 @@ function useAllEventsData(search: string, page: number, limit: number) {
 
 function useAttendEventMutation() {
   const { confirm, ConfirmDialogComponent } = useConfirm();
+  const { t } = useTranslation();
 
   // Check if there are overlapping events
   // If yes then confirm with user that we want to proceed
@@ -43,8 +44,10 @@ function useAttendEventMutation() {
     if (overlapingEvents.length) {
       // Wait for confirmation
       const userConfirmed = await confirm({
-        title: "Overlap detected. Do you want to proceed anyway?",
-        message: `Detected overlap with: ${overlapingEvents.map((event) => event.name).join(", ")}`,
+        title: t("event.overlap_confirm_title"),
+        message: t("event.overlap_confirm_message", {
+          events: overlapingEvents.map((event) => event.name).join(", "),
+        }),
       });
       if (!userConfirmed) {
         return;
@@ -80,7 +83,7 @@ function useResignFromAttendEvent() {
 }
 
 // Hook responsible for data fetching, mutations and state manipulation of AllEvents component
-function useAllEventsControler() {
+function useAllEventsController() {
   // Handles query params
   const params = useQueryParamControls();
   // Handles events data requests
@@ -100,7 +103,7 @@ function useAllEventsControler() {
   const AllEventsControls = (
     <>
       {ConfirmDialogComponent}
-      <CommonToolabr
+      <CommonToolbar
         isLoading={
           allEventsPending || attendEventPending || resignFromEventPending
         }
@@ -124,7 +127,7 @@ export default function AllEvents() {
     AllEventsControls,
     attendEventMutation,
     resignFromAttendEventMutation,
-  } = useAllEventsControler();
+  } = useAllEventsController();
   const { t } = useTranslation();
 
   const noData = data === undefined || data.events.length === 0;
@@ -142,8 +145,8 @@ export default function AllEvents() {
       ) : (
         <Grid p={2} container spacing={3} justifyContent={"center"}>
           {data.events.map((event, index: number) => (
-            <Grid key={index} style={{ flexGrow: 1, maxWidth: 220 }}>
-              <EventCard key={event.id} event={event}>
+            <Grid key={event.id} style={{ flexGrow: 1, maxWidth: 220 }}>
+              <EventCard event={event}>
                 <ButtonGroup>
                   {event.attending ? (
                     <Tooltip title={t("event.resign")}>

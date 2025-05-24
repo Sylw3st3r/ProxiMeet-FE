@@ -41,6 +41,7 @@ export async function signin(data: {
   email: string;
   password: string;
 }): Promise<{
+  id: number;
   firstName: string;
   lastName: string;
   email: string;

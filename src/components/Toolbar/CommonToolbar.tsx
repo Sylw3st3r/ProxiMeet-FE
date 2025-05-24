@@ -2,7 +2,7 @@ import { Box, MenuItem, Pagination, Select, TextField } from "@mui/material";
 import { ReactNode } from "react";
 import BlankToolbar from "./BlankToolbar";
 
-export default function CommonToolabr({
+export default function CommonToolbar({
   search,
   setSearch,
   page,
@@ -49,7 +49,7 @@ export default function CommonToolabr({
         <MenuItem value={100}>100</MenuItem>
       </Select>
       <Pagination
-        count={totalPages ? totalPages : 0}
+        count={totalPages ? totalPages : 1}
         page={page}
         onChange={(event, value) => setPage(value)}
         variant="outlined"

@@ -16,7 +16,7 @@ import { IconButton, Tooltip } from "@mui/material";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { ChecklistSharp } from "@mui/icons-material";
-import CommonToolabr from "../../Toolbar/CommonToolbar";
+import CommonToolbar from "../../Toolbar/CommonToolbar";
 import useQueryParamControls from "../../../hooks/useQueryParamsControls";
 
 // Hook resposnible for handling state of selected notifications
@@ -144,7 +144,7 @@ function useInboxControls() {
   const InboxControls = (
     <>
       {ConfirmDialogComponent}
-      <CommonToolabr
+      <CommonToolbar
         isLoading={
           notificationsPending ||
           markAllPending ||
@@ -189,7 +189,7 @@ function useInboxControls() {
             </IconButton>
           </span>
         </Tooltip>
-      </CommonToolabr>
+      </CommonToolbar>
     </>
   );
 

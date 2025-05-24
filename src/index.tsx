@@ -6,7 +6,6 @@ import AuthProvider from "./authentication/AuthProvider";
 import { createTheme, ThemeProvider } from "@mui/material";
 import { SnackbarProvider } from "notistack";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import AxiosInterceptor from "./hooks/useAxiosInterceptor";
 import LocationProvider from "./location/LocationProvider";
 import TranslationProvider from "./translations/TranslationProvider";
 

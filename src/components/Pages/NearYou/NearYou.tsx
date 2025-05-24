@@ -128,7 +128,7 @@ export default function NearYou() {
       <MapContainer
         center={[pickedLocation.lat, pickedLocation.lng]}
         zoom={9}
-        style={{ flex: 1 }}
+        style={{ flex: 1, zIndex: 1 }}
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

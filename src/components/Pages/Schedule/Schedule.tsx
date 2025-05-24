@@ -68,7 +68,7 @@ function useScheduleState() {
   return { mode, setMode, currentDate, goToNext, goToPrevious, goToToday };
 }
 
-function useScheduleControler() {
+function useScheduleController() {
   const { currentDate, mode, setMode, goToPrevious, goToToday, goToNext } =
     useScheduleState();
   const { scheduleData, schedulePending } = useScheduleData(currentDate, mode);
@@ -106,7 +106,7 @@ function useScheduleControler() {
 
 const Schedule = () => {
   const { scheduleData, mode, currentDate, ScheduleToolbarComponent } =
-    useScheduleControler();
+    useScheduleController();
 
   const theme = useTheme();
 

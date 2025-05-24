@@ -1,6 +1,7 @@
 import { createContext } from "react";
 
 export const AuthContext = createContext<{
+  id: null | number;
   firstName: null | string;
   lastName: null | string;
   email: null | string;
@@ -8,6 +9,7 @@ export const AuthContext = createContext<{
   refreshToken: null | string;
   refreshTokenExpirationDate: null | string;
   logIn: (userData: {
+    id: number;
     firstName: string;
     lastName: string;
     email: string;
@@ -16,6 +18,7 @@ export const AuthContext = createContext<{
   }) => void;
   logOut: () => void;
 }>({
+  id: null,
   firstName: null,
   lastName: null,
   email: null,

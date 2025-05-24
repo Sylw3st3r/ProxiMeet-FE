@@ -5,6 +5,7 @@ import { Box, useTheme } from "@mui/material";
 import SidebarNav from "./Sidebar";
 import { LocationContext } from "../../../location/location-context";
 import LocationRequiredView from "../../Pages/LocationRequiredView";
+import { ChatManager } from "../../Chat/ChatManager";
 
 export default function MainLayout() {
   const { refreshToken } = useContext(AuthContext);
@@ -31,6 +32,7 @@ export default function MainLayout() {
       >
         <Outlet />
       </Box>
+      <ChatManager />
     </Box>
   );
 }
