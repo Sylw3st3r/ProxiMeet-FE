@@ -5,6 +5,7 @@ export const AuthContext = createContext<{
   firstName: null | string;
   lastName: null | string;
   email: null | string;
+  avatar: null | string;
   token: null | string;
   refreshToken: null | string;
   refreshTokenExpirationDate: null | string;
@@ -14,7 +15,13 @@ export const AuthContext = createContext<{
     lastName: string;
     email: string;
     token: string;
+    avatar: null | string;
     refreshToken: string;
+  }) => void;
+  updateUserData: (userData: {
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
   }) => void;
   logOut: () => void;
 }>({
@@ -25,6 +32,8 @@ export const AuthContext = createContext<{
   token: null,
   refreshToken: null,
   refreshTokenExpirationDate: null,
+  avatar: null,
   logIn: () => {},
   logOut: () => {},
+  updateUserData: () => {},
 });

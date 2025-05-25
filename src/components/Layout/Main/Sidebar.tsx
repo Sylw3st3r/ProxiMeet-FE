@@ -12,13 +12,12 @@ import {
   IconButton,
   Box,
   useTheme,
-  Badge,
 } from "@mui/material";
-import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import {
+  AccountCircle,
   CalendarMonth,
   ExitToApp,
   ListAltSharp,
@@ -30,13 +29,13 @@ import { AuthContext } from "../../../authentication/auth-context";
 import { useTranslation } from "react-i18next";
 import { LanguageMenu } from "../../Settings/LanguageMenu";
 import ThemeSwitch from "../../Settings/ThemeSwitch";
-import { useQuery } from "@tanstack/react-query";
-import { getUnseenNotificationsCount } from "../../../vendor/notifications-vendor";
+import InboxStateAwareIcon from "./InboxStateAwareIcon";
+import ProfileAvatarIcon from "./ProfileAvatarIcon";
 
 const drawerWidth = 280;
 const iconOnlyWidth = 60;
 
-const navItems = (unseenNotificationsCount: number | undefined) => [
+const navItems = [
   {
     label: "sidenav.dashboard",
     icon: <DashboardIcon />,
@@ -69,33 +68,19 @@ const navItems = (unseenNotificationsCount: number | undefined) => [
   },
   {
     label: "sidenav.inbox",
-    icon: unseenNotificationsCount ? (
-      <Badge badgeContent={unseenNotificationsCount} color="secondary">
-        <MailIcon />
-      </Badge>
-    ) : (
-      <MailIcon />
-    ),
+    icon: <InboxStateAwareIcon />,
     path: "/dashboard/inbox",
+    end: false,
+  },
+  {
+    label: "sidenav.profile",
+    icon: <ProfileAvatarIcon />,
+    path: "/dashboard/profile",
     end: false,
   },
 ];
 
-function useInboxPolling() {
-  // Polling every 30s to check if we have something new in inbox
-  // At the beggining used websockets to inform user about new notification
-  // Decided that it was an overkill
-  const { data } = useQuery({
-    queryKey: ["unseen-notifications-count"],
-    queryFn: ({ signal }) => getUnseenNotificationsCount(signal),
-    refetchInterval: 30000,
-  });
-
-  return { data };
-}
-
 export default function SidebarNav() {
-  const { data } = useInboxPolling();
   const { logOut } = useContext(AuthContext);
   const theme = useTheme();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -150,7 +135,7 @@ export default function SidebarNav() {
         </Toolbar>
         <Divider />
         <List>
-          {navItems(data).map((item) => (
+          {navItems.map((item) => (
             <NavLink
               key={item.label}
               to={item.path}

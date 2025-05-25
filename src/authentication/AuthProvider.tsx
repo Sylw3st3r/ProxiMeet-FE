@@ -21,6 +21,7 @@ interface AuthState {
   firstName: string | null;
   lastName: string | null;
   email: string | null;
+  avatar: string | null;
   refreshToken: string | null;
   refreshTokenExpirationDate: string | null;
 }
@@ -32,6 +33,7 @@ const defaultAuthState: AuthState = {
   email: null,
   refreshToken: null,
   refreshTokenExpirationDate: null,
+  avatar: null,
 };
 
 function useAuthController() {
@@ -57,6 +59,7 @@ function useAuthController() {
       email,
       token,
       refreshToken,
+      avatar,
     }: Omit<AuthState, "refreshTokenExpirationDate"> & { token: string }) => {
       const expirationDate = new Date(
         Date.now() + TOKEN_EXPIRATION_DAYS * 24 * 60 * 60 * 1000,
@@ -67,6 +70,7 @@ function useAuthController() {
         lastName,
         email,
         refreshToken,
+        avatar,
         refreshTokenExpirationDate: expirationDate.toISOString(),
       };
       localStorage.setItem("userData", JSON.stringify(newState));
@@ -76,6 +80,22 @@ function useAuthController() {
     [],
   );
 
+  const updateUserData = (updatedState: {
+    firstName?: string;
+    lastName?: string;
+    avatar?: string;
+  }) => {
+    console.log(updateUserData);
+    setAuthState((oldState) => {
+      const newState = {
+        ...oldState,
+        ...updatedState,
+      };
+      localStorage.setItem("userData", JSON.stringify(newState));
+      return newState;
+    });
+  };
+
   return {
     ...authState,
     token,
@@ -83,6 +103,7 @@ function useAuthController() {
     logOut,
     setAuthState,
     setToken,
+    updateUserData,
   };
 }
 
@@ -160,12 +181,14 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     lastName,
     email,
     token,
+    avatar,
     refreshToken,
     refreshTokenExpirationDate,
     logIn,
     logOut,
     setAuthState,
     setToken,
+    updateUserData,
   } = useAuthController();
 
   useAuthInitializer(setAuthState, setToken);
@@ -189,10 +212,12 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         lastName,
         email,
         token,
+        avatar,
         refreshToken,
         refreshTokenExpirationDate,
         logIn,
         logOut,
+        updateUserData,
       }}
     >
       {!dataLoading && children}

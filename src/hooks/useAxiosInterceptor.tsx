@@ -12,6 +12,7 @@ export default function useAxiosInterceptor() {
         const targetUrls = [
           "http://localhost:3001/events",
           "http://localhost:3001/notifications",
+          "http://localhost:3001/profile",
         ];
 
         if (targetUrls.some((url) => config.url?.startsWith(url))) {

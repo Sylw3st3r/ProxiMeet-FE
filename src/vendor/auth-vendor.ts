@@ -47,6 +47,7 @@ export async function signin(data: {
   email: string;
   token: string;
   refreshToken: string;
+  avatar: string | null;
 }> {
   const response = await axios.post(`${url}/signin`, data);
   return response.data;

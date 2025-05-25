@@ -133,23 +133,33 @@ export default function ImageUpload({
     <>
       <FormControl fullWidth error={showError} variant="standard">
         {label && (
-          <InputLabel focused shrink htmlFor={`image-upload-${name}`}>
+          <Typography
+            variant="caption"
+            sx={{
+              display: "block",
+              mb: 0.5,
+              color: showError ? "error.main" : "text.primary",
+            }}
+          >
             {t(label)}
-          </InputLabel>
+          </Typography>
         )}
 
         {!field.value && (
           <Box
             {...getRootProps()}
             sx={{
-              borderBottom: 1,
+              border: 1,
               borderColor: showError ? "error.main" : "text.primary",
               pb: 0.5,
-              pt: 2.5,
+              aspectRatio: aspect,
               cursor: "pointer",
               "&:hover": {
                 backgroundColor: isDragActive ? "action.hover" : "transparent",
               },
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
             <input {...getInputProps()} id={`image-upload-${name}`} />

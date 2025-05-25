@@ -32,7 +32,7 @@ export default function MainLayout() {
       >
         <Outlet />
       </Box>
-      <ChatManager />
+      {/* <ChatManager /> */}
     </Box>
   );
 }

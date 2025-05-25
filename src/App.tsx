@@ -25,6 +25,7 @@ import PasswordReset from "./components/Pages/PasswordReset/PasswordReset";
 import Schedule from "./components/Pages/Schedule/Schedule";
 import useAxiosInterceptor from "./hooks/useAxiosInterceptor";
 import Inbox from "./components/Pages/Inbox/Inbox";
+import Profile from "./components/Pages/Profile/Profile";
 
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -67,6 +68,10 @@ const appRouter = createBrowserRouter([
       {
         path: "inbox",
         Component: Inbox,
+      },
+      {
+        path: "profile",
+        Component: Profile,
       },
     ],
   },
