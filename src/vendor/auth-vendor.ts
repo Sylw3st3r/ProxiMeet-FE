@@ -2,20 +2,22 @@ import axios from "axios";
 
 const url = "http://localhost:3001/users";
 
-export async function requestNewAccessToken(
-  refreshToken: string,
-): Promise<string> {
-  const response = await axios.post(`${url}/token`, {
-    refreshToken,
+export async function requestNewAccessToken(): Promise<string> {
+  const response = await axios.get(`${url}/token`, {
+    withCredentials: true,
   });
   return response.data.token;
 }
 
 // Remove refresh token on BE side
-export async function removeRefreshToken(refreshToken: string): Promise<{}> {
-  const response = await axios.post(`${url}/logout`, {
-    refreshToken,
-  });
+export async function removeRefreshToken(): Promise<{}> {
+  const response = await axios.post(
+    `${url}/logout`,
+    {},
+    {
+      withCredentials: true,
+    },
+  );
   return response.data;
 }
 
@@ -49,7 +51,9 @@ export async function signin(data: {
   refreshToken: string;
   avatar: string | null;
 }> {
-  const response = await axios.post(`${url}/signin`, data);
+  const response = await axios.post(`${url}/signin`, data, {
+    withCredentials: true,
+  });
   return response.data;
 }
 
@@ -66,5 +70,19 @@ export async function requestPasswordResetToken(data: {
   email: string;
 }): Promise<{}> {
   const response = await axios.post(`${url}/request-password-reset`, data);
+  return response.data;
+}
+
+export async function getUserData(): Promise<{
+  avatar: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  token: string;
+  id: number;
+}> {
+  const response = await axios.get(`${url}/me`, {
+    withCredentials: true,
+  });
   return response.data;
 }

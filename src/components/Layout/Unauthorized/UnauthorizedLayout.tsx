@@ -8,16 +8,17 @@ import { LanguageMenu } from "../../Settings/LanguageMenu";
 import ThemeSwitch from "../../Settings/ThemeSwitch";
 
 export default function UnauthorizedLayout() {
-  const { refreshToken } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const { View } = useLottie({
     loop: true,
     animationData: animation,
   });
 
-  // Layout for when user is unauthorized. If user is authorized the we redirect to "/dashboard"
-  return refreshToken ? (
-    <Navigate to="/dashboard" />
-  ) : (
+  if (token) {
+    return <Navigate to="/dashboard" />;
+  }
+
+  return (
     <Box sx={{ height: "100vh", display: "flex", flexDirection: "row" }}>
       <Box
         sx={{

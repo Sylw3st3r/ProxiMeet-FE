@@ -134,7 +134,6 @@ export function ChatWindow({
           borderTop: "1px solid #ddd",
           display: "flex",
           gap: 1,
-          bgcolor: "background.paper",
         }}
       >
         <TextField

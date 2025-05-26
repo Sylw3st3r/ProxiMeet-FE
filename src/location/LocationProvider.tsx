@@ -11,13 +11,13 @@ export default function LocationProvider({
     lat: number;
     lng: number;
   }>(null);
-  const { refreshToken } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const [requestingLocation, setRequestingLocation] = useState(false);
 
   useEffect(() => {
     // Check if user is authorized before asking for location
-    if (!refreshToken) {
-      return;
+    if (!token) {
+      setLocation(null);
     }
 
     if (!navigator.geolocation) {
@@ -38,7 +38,7 @@ export default function LocationProvider({
         setRequestingLocation(false);
       },
     );
-  }, [refreshToken]);
+  }, [token]);
 
   return (
     <LocationContext.Provider value={{ location, requestingLocation }}>

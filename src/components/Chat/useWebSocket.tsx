@@ -5,7 +5,6 @@ const MAX_RETRIES = 10;
 
 export function useWebSocket(onMessage: (data: any) => void) {
   const socketRef = useRef<WebSocket | null>(null);
-  const retryRef = useRef(0);
   const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
   const { token } = useContext(AuthContext);
 
@@ -17,37 +16,26 @@ export function useWebSocket(onMessage: (data: any) => void) {
 
     ws.onopen = () => {
       console.log("✅ WebSocket connected");
-      retryRef.current = 0; // Reset retry count
     };
 
     ws.onmessage = (event) => {
+      console.log("✅ Message recived connected");
       try {
         const data = JSON.parse(event.data);
         onMessage(data);
       } catch {}
     };
 
-    ws.onclose = () => {
-      console.warn("❌ WebSocket closed. Attempting to reconnect...");
-      attemptReconnect();
+    ws.onclose = (event) => {
+      console.warn(
+        `❌ WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`,
+      );
     };
 
     ws.onerror = (err) => {
       console.error("WebSocket error:", err);
       ws.close(); // Trigger reconnect logic
     };
-  };
-
-  const attemptReconnect = () => {
-    if (retryRef.current < MAX_RETRIES) {
-      const delay = Math.min(1000 * 2 ** retryRef.current, 30000);
-      reconnectTimeout.current = setTimeout(() => {
-        retryRef.current += 1;
-        connect();
-      }, delay);
-    } else {
-      console.error("❌ Max WebSocket reconnection attempts reached");
-    }
   };
 
   useEffect(() => {
@@ -57,7 +45,7 @@ export function useWebSocket(onMessage: (data: any) => void) {
       if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
       socketRef.current?.close();
     };
-  }, [token]); // Reconnect when token changes
+  }, [token]);
 
   const sendMessage = (eventId: number, message: string) => {
     if (socketRef.current?.readyState === WebSocket.OPEN) {

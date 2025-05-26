@@ -23,7 +23,6 @@ import AllEvents from "./components/Pages/Events/AllEvents";
 import RequestPasswordReset from "./components/Pages/RequestPasswordReset/RequestPasswordReset";
 import PasswordReset from "./components/Pages/PasswordReset/PasswordReset";
 import Schedule from "./components/Pages/Schedule/Schedule";
-import useAxiosInterceptor from "./hooks/useAxiosInterceptor";
 import Inbox from "./components/Pages/Inbox/Inbox";
 import Profile from "./components/Pages/Profile/Profile";
 
@@ -105,12 +104,5 @@ const appRouter = createBrowserRouter([
 ]);
 
 export default function App() {
-  const { refreshToken } = useContext(AuthContext);
-  const { interceptorReady } = useAxiosInterceptor();
-
-  if (refreshToken && !interceptorReady) {
-    return null;
-  }
-
   return <RouterProvider router={appRouter} />;
 }

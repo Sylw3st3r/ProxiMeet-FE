@@ -32,7 +32,6 @@ export function ChatManager() {
         display: "flex",
         gap: 2,
         maxWidth: "100vw",
-        overflowX: "auto",
         padding: 1,
         zIndex: 100,
       }}

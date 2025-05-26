@@ -8,11 +8,11 @@ import LocationRequiredView from "../../Pages/LocationRequiredView";
 import { ChatManager } from "../../Chat/ChatManager";
 
 export default function MainLayout() {
-  const { refreshToken } = useContext(AuthContext);
+  const { token } = useContext(AuthContext);
   const { location } = useContext(LocationContext);
   const theme = useTheme();
 
-  if (!refreshToken) {
+  if (!token) {
     return <Navigate to="/" />;
   }
 
@@ -32,7 +32,7 @@ export default function MainLayout() {
       >
         <Outlet />
       </Box>
-      {/* <ChatManager /> */}
+      <ChatManager />
     </Box>
   );
 }
