@@ -62,12 +62,14 @@ function useAttendEventMutation() {
       onSuccess: () => {
         client.invalidateQueries({ queryKey: ["user-events"] });
         client.invalidateQueries({ queryKey: ["events"] });
+        client.invalidateQueries({ queryKey: ["events-by-unread"] });
       },
     });
 
   return { ConfirmDialogComponent, attendEventMutation, attendEventPending };
 }
 
+// TODO: add confirmation prompot. Inform user that he will not recieve any more new message.
 function useResignFromAttendEvent() {
   const {
     mutate: resignFromAttendEventMutation,

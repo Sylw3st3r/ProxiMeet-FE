@@ -5,7 +5,6 @@ const MAX_RETRIES = 10;
 
 export function useWebSocket(onMessage: (data: any) => void) {
   const socketRef = useRef<WebSocket | null>(null);
-  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
   const { token } = useContext(AuthContext);
 
   const connect = () => {
@@ -34,7 +33,7 @@ export function useWebSocket(onMessage: (data: any) => void) {
 
     ws.onerror = (err) => {
       console.error("WebSocket error:", err);
-      ws.close(); // Trigger reconnect logic
+      ws.close();
     };
   };
 
@@ -42,8 +41,9 @@ export function useWebSocket(onMessage: (data: any) => void) {
     connect();
 
     return () => {
-      if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
-      socketRef.current?.close();
+      if (!token) {
+        socketRef.current?.close();
+      }
     };
   }, [token]);
 

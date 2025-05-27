@@ -137,3 +137,60 @@ export async function getScheduleEvents(
   );
   return response.data.events;
 }
+
+export async function getChatEvents(signal: AbortSignal): Promise<number> {
+  const response = await axios.get(`${url}/chat/status`, {
+    signal,
+  });
+  return response.data.totalUnreadMessagesCount;
+}
+
+type ChatMessage = {
+  id: number;
+  event_id: number;
+  sender_id: number | null;
+  message: string;
+  timestamp: number;
+};
+
+type GetEventMessagesResult = {
+  messages: ChatMessage[];
+  hasMore: boolean;
+};
+
+export async function getChatMessages(
+  signal: AbortSignal,
+  eventId: number,
+  messageId?: number,
+): Promise<GetEventMessagesResult> {
+  const urlSuffix = messageId ? `?before=${messageId}` : "";
+  const response = await axios.get(
+    `${url}/chat/${eventId}/messages${urlSuffix}`,
+    {
+      signal,
+    },
+  );
+  return response.data;
+}
+
+export async function getEventsByUnreadCount(
+  signal: AbortSignal,
+  page: number,
+  limit: number,
+): Promise<{
+  events: {
+    event_id: number;
+    event_name: string;
+    unread_count: number;
+  }[];
+  currentPage: number;
+  totalPages: number;
+}> {
+  const response = await axios.get(
+    `${url}/chat/events?page=${page}&limit=${limit}`,
+    {
+      signal,
+    },
+  );
+  return response.data;
+}
