@@ -138,11 +138,11 @@ export async function getScheduleEvents(
   return response.data.events;
 }
 
-export async function getChatEvents(signal: AbortSignal): Promise<number> {
+export async function getChatEvents(signal: AbortSignal): Promise<number[]> {
   const response = await axios.get(`${url}/chat/status`, {
     signal,
   });
-  return response.data.totalUnreadMessagesCount;
+  return response.data.unread;
 }
 
 type ChatMessage = {
@@ -181,7 +181,7 @@ export async function getEventsByUnreadCount(
   events: {
     event_id: number;
     event_name: string;
-    unread_count: number;
+    last_message_timestamp: number | null;
   }[];
   currentPage: number;
   totalPages: number;
@@ -192,5 +192,12 @@ export async function getEventsByUnreadCount(
       signal,
     },
   );
+  return response.data;
+}
+
+export async function markMessagesAsRead(eventId: number): Promise<{}> {
+  const response = await axios.post(`${url}/chat/read`, {
+    eventId,
+  });
   return response.data;
 }

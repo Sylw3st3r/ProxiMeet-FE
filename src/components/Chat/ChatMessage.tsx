@@ -1,4 +1,4 @@
-import { Box, ListItem, Typography, useTheme } from "@mui/material";
+import { Box, ListItem, Typography, useTheme, Avatar } from "@mui/material";
 import { useContext } from "react";
 import { AuthContext } from "../../authentication/auth-context";
 import { Message } from "./useChatMessages";
@@ -16,10 +16,10 @@ export function ChatMessage({
   // If message does not have sender id then that means that it was a system message
   // For example "User John Doe has joined the chat"
   // We use this flag to aply specific styles
-  const isSystem = message.sender_id === null;
+  const isSystem = message.sender === null;
   // If user is the one who send this message the we also want to aply differen styles
   // Messages on the right, different color of the message and no caption
-  const isUser = message.sender_id === id;
+  const isUser = message?.sender?.id === id;
 
   if (isSystem) {
     return (
@@ -46,16 +46,31 @@ export function ChatMessage({
   return (
     <Box>
       {showCaption && !isUser && (
-        <Typography
-          variant="caption"
+        <Box
           sx={{
+            display: "flex",
+            alignItems: "center",
             ml: 1,
             mb: 0.5,
             color: theme.palette.text.secondary,
           }}
         >
-          User {message.sender_id}
-        </Typography>
+          <Avatar
+            src={
+              message.sender?.avatar
+                ? `http://localhost:3001/images/${message.sender?.avatar}`
+                : undefined
+            }
+            sx={{ width: 24, height: 24, mr: 1 }}
+          >
+            {!message.sender?.avatar && message.sender?.firstName
+              ? message.sender.firstName[0]
+              : ""}
+          </Avatar>
+          <Typography variant="caption">
+            {`${message.sender?.firstName} ${message.sender?.lastName}`}
+          </Typography>
+        </Box>
       )}
       <ListItem
         sx={{

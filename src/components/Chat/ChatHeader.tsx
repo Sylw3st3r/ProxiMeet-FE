@@ -4,19 +4,25 @@ import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import CloseIcon from "@mui/icons-material/Close";
 
 export function ChatHeader({
-  eventId,
+  event,
   collapsed,
   onToggleCollapse,
   onClose,
+  hasUnread,
 }: {
-  eventId: number;
+  event: {
+    event_id: number;
+    event_name: string;
+    last_message_timestamp: number | null;
+  };
   collapsed: boolean;
   onToggleCollapse: () => void;
   onClose: () => void;
+  hasUnread: boolean;
 }) {
   return (
     <Box
-      sx={{
+      sx={(theme) => ({
         p: 1,
         borderBottom: "1px solid #ddd",
         bgcolor: "primary.main",
@@ -24,15 +30,25 @@ export function ChatHeader({
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-      }}
+        animation: hasUnread ? "pulseBg 1.6s infinite ease-in-out" : "none",
+        "@keyframes pulseBg": {
+          "0%": {
+            backgroundColor: theme.palette.primary.light,
+          },
+          "50%": {
+            backgroundColor: theme.palette.primary.dark,
+          },
+          "100%": {
+            backgroundColor: theme.palette.primary.light,
+          },
+        },
+      })}
     >
       <Typography variant="h6" sx={{ flexGrow: 1 }}>
-        {/* TODO: replace with actuall name of event */}
-        Event Chat #{eventId}
+        {event.event_name}
       </Typography>
 
       <Box>
-        {/* TODO: add button for marking all events of chat as read */}
         <IconButton
           size="small"
           onClick={onToggleCollapse}

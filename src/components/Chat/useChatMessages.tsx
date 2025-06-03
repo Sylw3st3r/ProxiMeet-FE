@@ -6,18 +6,30 @@ import { getChatMessages } from "../../vendor/events-vendor";
 export type Message = {
   id: number;
   event_id: number;
-  sender_id: number | null;
+  sender: {
+    id: number;
+    firstName: string;
+    lastName: string;
+    avatar: string | null;
+  } | null;
   message: string;
 };
 
 // Split in 2 separate hooks and combine into one
-export function useChatMessages(eventId: number, liveMessages: Message[]) {
+export function useChatMessages(
+  event: {
+    event_id: number;
+    event_name: string;
+    last_message_timestamp: number | null;
+  },
+  liveMessages: Message[],
+) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Query for fetching messages that are saved in DB
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["chatMessages", eventId],
+      queryKey: ["chatMessages", event.event_id],
       queryFn: async ({
         pageParam,
         signal,
@@ -25,7 +37,7 @@ export function useChatMessages(eventId: number, liveMessages: Message[]) {
         pageParam?: number;
         signal: AbortSignal;
       }) => {
-        return getChatMessages(signal, eventId, pageParam);
+        return getChatMessages(signal, event.event_id, pageParam);
       },
       getNextPageParam: (lastPage) => {
         if (!lastPage.hasMore || lastPage.messages.length === 0)

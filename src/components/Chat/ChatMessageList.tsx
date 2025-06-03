@@ -1,4 +1,4 @@
-import { Box, List } from "@mui/material";
+import { Box, CircularProgress, LinearProgress, List } from "@mui/material";
 import { useRef, useEffect } from "react";
 import { ChatMessage } from "./ChatMessage";
 import { Message } from "./useChatMessages";
@@ -33,15 +33,24 @@ export function ChatMessageList({
         position: "relative",
       }}
     >
-      {/* TODO: add visual indicator of more data being loaded */}
-      {/* TODO: with the use of debouncing mark messages as read from the newest to the one we scrolled up to */}
+      {isLoadingMore && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignContent: "center",
+          }}
+        >
+          <CircularProgress />
+        </Box>
+      )}
       <List dense>
         {messages.map((message, i) => {
           // Find id of the last person who sent a message
-          const prevSender = i > 0 ? messages[i - 1].sender_id : null;
+          const prevSender = i > 0 ? messages[i - 1]?.sender?.id : null;
           // If the message sender is same as in the previus message then we do not show caption again
           const showCaption =
-            message.sender_id !== null && message.sender_id !== prevSender;
+            message.sender !== null && message.sender.id !== prevSender;
           return (
             <ChatMessage
               key={message.id}

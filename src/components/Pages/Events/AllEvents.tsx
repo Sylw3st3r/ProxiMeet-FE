@@ -79,6 +79,7 @@ function useResignFromAttendEvent() {
     onSuccess: () => {
       client.invalidateQueries({ queryKey: ["user-events"] });
       client.invalidateQueries({ queryKey: ["events"] });
+      client.invalidateQueries({ queryKey: ["events-by-unread"] });
     },
   });
   return { resignFromAttendEventMutation, resignFromEventPending };

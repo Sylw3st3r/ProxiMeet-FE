@@ -1,59 +1,87 @@
-import { useState, useRef } from "react";
+import { useState, useContext } from "react";
 import { ChatWindow } from "./ChatWindow";
 import { useWebSocket } from "./useWebSocket";
 import { Box, Fab, Badge } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
-import { useQuery } from "@tanstack/react-query";
-import { getChatEvents } from "../../vendor/events-vendor";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getChatEvents, markMessagesAsRead } from "../../vendor/events-vendor";
 import { Message } from "./useChatMessages";
 import { ChatMenu } from "./ChatMenu";
-import { client } from "../..";
+import { AuthContext } from "../../authentication/auth-context";
+
+function useUnreadStatus() {
+  // List of events with unread messages recieved via websockets
+  // We hold it in state so that we don't fetch status each time we recieve a new message
+  const [eventsWithUnreadMessage, setEventsWithUnreadMessage] = useState<
+    number[]
+  >([]);
+
+  // Function for adding new event to the unread state
+  function addNewEventWithUnreadMessage(event_id: number) {
+    setEventsWithUnreadMessage((previous) => {
+      return Array.from(new Set([...previous, event_id]));
+    });
+  }
+
+  // Returns array of event ids for all events with any unread message
+  const { data, refetch } = useQuery({
+    queryKey: ["unread-chat"],
+    queryFn: async ({ signal }) => {
+      const response = await getChatEvents(signal);
+      setEventsWithUnreadMessage([]);
+      return response;
+    },
+    refetchOnWindowFocus: false,
+    staleTime: Infinity,
+  });
+
+  const { mutate: markAsReadMutation } = useMutation({
+    mutationFn: markMessagesAsRead,
+    onSuccess() {
+      refetch();
+    },
+  });
+
+  // List of unique events with unread messages
+  const combinedEventsWithUnreadMessage = Array.from(
+    new Set([...(data || []), ...eventsWithUnreadMessage]),
+  );
+
+  return {
+    combinedEventsWithUnreadMessage,
+    addNewEventWithUnreadMessage,
+    markAsReadMutation,
+  };
+}
 
 export function ChatManager() {
   // Messages recived websockets
   const [chats, setChats] = useState<{ [event_id: number]: Message[] }>({});
-  const [activeChatId, setActiveChatId] = useState<number | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const { id } = useContext(AuthContext);
+  const [activeChat, setActiveChat] = useState<{
+    event_id: number;
+    event_name: string;
+    last_message_timestamp: number | null;
+  } | null>(null);
 
-  // Returns count of unread messages
-  // All unread messages since he joined
-  // And all unread messages up to the moment he left event
-  const { data } = useQuery({
-    queryKey: ["unread-chat"],
-    queryFn: ({ signal }) => getChatEvents(signal),
-  });
-
-  const anchorRef = useRef<HTMLDivElement>(null);
+  const {
+    combinedEventsWithUnreadMessage,
+    addNewEventWithUnreadMessage,
+    markAsReadMutation,
+  } = useUnreadStatus();
 
   // Send message via Websockets
   const { sendMessage } = useWebSocket((incomingMessage: Message) => {
-    const { event_id } = incomingMessage;
+    const { event_id, sender } = incomingMessage;
     setChats((prev) => ({
       ...prev,
       [event_id]: [...(prev[event_id] || []), incomingMessage],
     }));
-    // On message recieved refetch state of unread messages
-    client.invalidateQueries({ queryKey: ["unread-chat"] });
-  });
-
-  const handleSelectChat = (eventId: number) => {
-    setActiveChatId(eventId);
-    setMenuOpen(false);
-  };
-
-  const handleToggleMenu = () => {
-    setMenuOpen((prev) => !prev);
-  };
-
-  const handleCloseMenu = (event: Event | React.SyntheticEvent) => {
-    if (
-      anchorRef.current &&
-      anchorRef.current.contains(event.target as HTMLElement)
-    ) {
-      return;
+    // If user is the sender the we know that he read that message (because he sent it). Thats why we ignore recieved message
+    if (id !== sender?.id) {
+      addNewEventWithUnreadMessage(event_id);
     }
-    setMenuOpen(false);
-  };
+  });
 
   return (
     <Box
@@ -67,48 +95,23 @@ export function ChatManager() {
         zIndex: 100,
       }}
     >
-      <Box ref={anchorRef}>
-        <Fab
-          color="primary"
-          onClick={handleToggleMenu}
-          sx={
-            data
-              ? {
-                  animation: "pulse 1.2s infinite ease-in-out",
-                  "@keyframes pulse": {
-                    "0%": { transform: "scale(1)", boxShadow: 3 },
-                    "50%": { transform: "scale(1.1)", boxShadow: 6 },
-                    "100%": { transform: "scale(1)", boxShadow: 3 },
-                  },
-                }
-              : undefined
-          }
-        >
-          {data ? (
-            <Badge badgeContent={data} color="secondary">
-              <ChatIcon />
-            </Badge>
-          ) : (
-            <ChatIcon />
-          )}
-        </Fab>
-
-        {/* Move to sidebar when ready, Probably will have to turn Manager into provider */}
-        <ChatMenu
-          anchorEl={anchorRef.current}
-          open={menuOpen}
-          onClose={handleCloseMenu}
-          onSelectChat={handleSelectChat}
-        />
-      </Box>
-
-      {activeChatId && (
+      <ChatMenu
+        setActiveChat={setActiveChat}
+        eventsWithUnreadMessages={combinedEventsWithUnreadMessage}
+      />
+      {activeChat && (
         <ChatWindow
-          onClose={() => setActiveChatId(null)}
-          key={activeChatId}
-          eventId={activeChatId}
-          liveMessages={chats[activeChatId] || []}
-          onSend={(msg) => sendMessage(activeChatId, msg)}
+          hasUnread={combinedEventsWithUnreadMessage.includes(
+            activeChat.event_id,
+          )}
+          onClose={() => setActiveChat(null)}
+          key={activeChat.event_id}
+          event={activeChat}
+          liveMessages={chats[activeChat.event_id] || []}
+          onSend={(msg) => sendMessage(activeChat.event_id, msg)}
+          markAsRead={() => {
+            markAsReadMutation(activeChat.event_id);
+          }}
         />
       )}
     </Box>

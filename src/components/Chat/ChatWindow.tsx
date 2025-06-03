@@ -7,21 +7,29 @@ import { ChatHeader } from "./ChatHeader";
 import { ChatInput } from "./ChatInput";
 
 export function ChatWindow({
-  eventId,
+  hasUnread,
+  event,
   onSend,
   onClose,
   liveMessages,
+  markAsRead,
 }: {
-  eventId: number;
+  event: {
+    event_id: number;
+    event_name: string;
+    last_message_timestamp: number | null;
+  };
   onSend: (message: string) => void;
   onClose: () => void;
   // Messages recieved via websockets
   liveMessages: Message[];
+  markAsRead: () => void;
+  hasUnread: boolean;
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
   const { scrollContainerRef, allMessages, isFetchingNextPage } =
-    useChatMessages(eventId, liveMessages);
+    useChatMessages(event, liveMessages);
 
   return (
     <Paper
@@ -35,7 +43,8 @@ export function ChatWindow({
       }}
     >
       <ChatHeader
-        eventId={eventId}
+        hasUnread={hasUnread}
+        event={event}
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed((prev) => !prev)}
         onClose={onClose}
@@ -49,7 +58,7 @@ export function ChatWindow({
             isLoadingMore={isFetchingNextPage}
             scrollContainerRef={scrollContainerRef}
           />
-          <ChatInput onSend={onSend} />
+          <ChatInput markAsRead={markAsRead} onSend={onSend} />
         </>
       )}
     </Paper>

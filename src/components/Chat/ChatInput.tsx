@@ -2,7 +2,13 @@ import { Box, TextField, IconButton } from "@mui/material";
 import SendIcon from "@mui/icons-material/Send";
 import { useState } from "react";
 
-export function ChatInput({ onSend }: { onSend: (msg: string) => void }) {
+export function ChatInput({
+  onSend,
+  markAsRead,
+}: {
+  onSend: (msg: string) => void;
+  markAsRead: () => void;
+}) {
   const [input, setInput] = useState("");
 
   const handleSend = () => {
@@ -27,6 +33,7 @@ export function ChatInput({ onSend }: { onSend: (msg: string) => void }) {
         size="small"
         fullWidth
         value={input}
+        onFocus={markAsRead}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter" && input.trim()) {

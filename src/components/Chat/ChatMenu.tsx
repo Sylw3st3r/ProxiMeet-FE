@@ -1,110 +1,236 @@
 import {
+  Badge,
+  Box,
+  CircularProgress,
+  Fab,
+  ListItemText,
   Menu,
   MenuItem,
   Stack,
   Typography,
-  Box,
-  ListItemText,
+  useTheme,
 } from "@mui/material";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
-import { useQuery } from "@tanstack/react-query";
+import ChatIcon from "@mui/icons-material/Chat";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef, useState } from "react";
 import { getEventsByUnreadCount } from "../../vendor/events-vendor";
 
 interface ChatMenuProps {
-  anchorEl: HTMLElement | null;
-  open: boolean;
-  onClose: (event: Event | React.SyntheticEvent) => void;
-  onSelectChat: (eventId: number) => void;
+  eventsWithUnreadMessages: number[];
+  setActiveChat: (event: {
+    event_id: number;
+    event_name: string;
+    last_message_timestamp: number | null;
+  }) => void;
 }
 
+const PAGE_SIZE = 20;
+
 export function ChatMenu({
-  anchorEl,
-  open,
-  onClose,
-  onSelectChat,
+  setActiveChat,
+  eventsWithUnreadMessages,
 }: ChatMenuProps) {
-  const { data } = useQuery({
-    queryKey: ["events-by-unread"],
-    queryFn: ({ signal }) => {
-      return getEventsByUnreadCount(signal, 1, 20);
-    },
-  });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["events-by-unread"],
+      queryFn: ({ pageParam, signal }) =>
+        getEventsByUnreadCount(signal, pageParam, PAGE_SIZE),
+      getNextPageParam: (lastPage, pages) =>
+        lastPage.totalPages > pages.length ? pages.length + 1 : undefined,
+      initialPageParam: 1,
+    });
 
-  if (!data) {
-    return null;
-  }
+  const [open, setOpen] = useState(false);
+  const observerRef = useRef<HTMLDivElement | null>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
 
-  // TODO: remake entire component,
-  // Add infinite scroll to load events with smaller number of unread messages
+  useEffect(() => {
+    if (!observerRef.current || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+
+    observer.observe(observerRef.current);
+
+    return () => observer.disconnect();
+  }, [hasNextPage, fetchNextPage]);
+
+  const allEvents = data?.pages.flatMap((page) => page.events) ?? [];
+
+  const handleToggleMenu = () => setOpen((prev) => !prev);
+
+  const handleCloseMenu = (event: Event | React.SyntheticEvent) => {
+    if (
+      anchorRef.current &&
+      anchorRef.current.contains(event.target as HTMLElement)
+    ) {
+      return;
+    }
+    setOpen(false);
+  };
 
   return (
-    <Menu
-      open={open}
-      onClose={onClose}
-      anchorEl={anchorEl}
-      anchorOrigin={{ vertical: "top", horizontal: "left" }}
-      transformOrigin={{ vertical: "bottom", horizontal: "right" }}
-      PaperProps={{
-        sx: {
-          minWidth: 280,
-          borderRadius: 2,
-          p: 1,
-          boxShadow: 6,
-        },
-      }}
-    >
-      {data.events.length ? (
-        data.events.map((event) => {
-          const isUnread = event.unread_count > 0;
-          return (
-            <MenuItem
-              key={event.event_id}
-              onClick={() => onSelectChat(event.event_id)}
-              sx={{
-                alignItems: "flex-start",
-                borderRadius: 1,
-                mb: 0.5,
-                "&:hover": {
-                  backgroundColor: "action.hover",
+    <Box ref={anchorRef}>
+      <Fab
+        color="primary"
+        onClick={handleToggleMenu}
+        sx={
+          eventsWithUnreadMessages.length
+            ? {
+                animation: "pulse 1.2s infinite ease-in-out",
+                "@keyframes pulse": {
+                  "0%": { transform: "scale(1)", boxShadow: 3 },
+                  "50%": { transform: "scale(1.1)", boxShadow: 6 },
+                  "100%": { transform: "scale(1)", boxShadow: 3 },
                 },
-              }}
-            >
-              <Stack
-                direction="row"
-                spacing={1}
-                alignItems="center"
-                width="100%"
-              >
-                {isUnread && (
-                  // Make it blink when there are unread messages
-                  <FiberManualRecordIcon
-                    color="error"
-                    sx={{ fontSize: 10, mt: 0.5 }}
-                  />
-                )}
-                <Box>
-                  <Typography
-                    variant="subtitle1"
-                    fontWeight={isUnread ? "bold" : "normal"}
-                    noWrap
+              }
+            : undefined
+        }
+      >
+        {eventsWithUnreadMessages.length ? (
+          <Badge
+            badgeContent={eventsWithUnreadMessages.length}
+            color="secondary"
+          >
+            <ChatIcon />
+          </Badge>
+        ) : (
+          <ChatIcon />
+        )}
+      </Fab>
+
+      <Menu
+        open={open}
+        onClose={handleCloseMenu}
+        anchorEl={anchorRef.current}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        PaperProps={{
+          sx: {
+            width: 340,
+            minHeight: 500,
+            maxHeight: 500,
+            overflowY: "auto",
+            borderRadius: 0,
+            p: 0,
+            boxShadow: 6,
+          },
+        }}
+        MenuListProps={{
+          disablePadding: true,
+        }}
+      >
+        <Box
+          sx={{
+            px: 2,
+            py: 1.5,
+            backgroundColor: "primary.dark",
+          }}
+        >
+          <Typography
+            variant="subtitle1"
+            fontWeight={600}
+            color="primary.contrastText"
+          >
+            Event group chats
+          </Typography>
+        </Box>
+
+        {isLoading ? (
+          <Stack alignItems="center" p={2}>
+            <CircularProgress size={24} />
+          </Stack>
+        ) : allEvents.length ? (
+          <>
+            {allEvents.map((event) => {
+              const hasUnread = eventsWithUnreadMessages.includes(
+                event.event_id,
+              );
+              return (
+                <MenuItem
+                  key={event.event_id}
+                  onClick={() => {
+                    setOpen(false);
+                    setActiveChat(event);
+                  }}
+                  sx={{
+                    borderRadius: 0,
+                    alignItems: "flex-start",
+                    px: 2,
+                    py: 1.2,
+                    "&:hover": {
+                      backgroundColor: "action.hover",
+                    },
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    spacing={1.5}
+                    alignItems="center"
+                    width="100%"
                   >
-                    {event.event_name}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" noWrap>
-                    {isUnread
-                      ? `${event.unread_count} unread message${event.unread_count > 1 ? "s" : ""}`
-                      : "No unread messages"}
-                  </Typography>
-                </Box>
-              </Stack>
-            </MenuItem>
-          );
-        })
-      ) : (
-        <MenuItem disabled>
-          <ListItemText primary="No chats available" />
-        </MenuItem>
-      )}
-    </Menu>
+                    {hasUnread && (
+                      <FiberManualRecordIcon
+                        color="secondary"
+                        sx={{
+                          width: "12px",
+                          height: "12px",
+                          animation: "blink 1s infinite",
+                          "@keyframes blink": {
+                            "0%": { opacity: 1 },
+                            "50%": { opacity: 0 },
+                            "100%": { opacity: 1 },
+                          },
+                        }}
+                      />
+                    )}
+                    <Box sx={{ overflow: "hidden" }}>
+                      <Typography
+                        variant="body1"
+                        noWrap
+                        fontWeight={500}
+                        sx={{ lineHeight: 1.3 }}
+                      >
+                        {event.event_name}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        noWrap
+                      >
+                        {event.last_message_timestamp
+                          ? new Date(
+                              event.last_message_timestamp,
+                            ).toLocaleString()
+                          : "No messages yet"}
+                      </Typography>
+                    </Box>
+                  </Stack>
+                </MenuItem>
+              );
+            })}
+
+            {hasNextPage && (
+              <Box
+                ref={observerRef}
+                display="flex"
+                justifyContent="center"
+                py={1}
+              >
+                {isFetchingNextPage && <CircularProgress size={20} />}
+              </Box>
+            )}
+          </>
+        ) : (
+          <MenuItem disabled sx={{ px: 2, py: 2 }}>
+            <ListItemText primary="No chats available" />
+          </MenuItem>
+        )}
+      </Menu>
+    </Box>
   );
 }
